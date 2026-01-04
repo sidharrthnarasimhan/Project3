@@ -104,6 +104,11 @@ function PagesContent() {
                         <Announcements />
                     </ProtectedRoute>
                 } />
+                <Route path="/announcements" element={
+                    <ProtectedRoute pageName="Announcements" currentUser={currentUser}>
+                        <Announcements />
+                    </ProtectedRoute>
+                } />
 
                 <Route path="/DecisionDetail" element={
                     <ProtectedRoute pageName="Decisions" currentUser={currentUser}>
@@ -116,8 +121,18 @@ function PagesContent() {
                         <Decisions />
                     </ProtectedRoute>
                 } />
+                <Route path="/decisions" element={
+                    <ProtectedRoute pageName="Decisions" currentUser={currentUser}>
+                        <Decisions />
+                    </ProtectedRoute>
+                } />
 
                 <Route path="/Home" element={
+                    <ProtectedRoute pageName="Home" currentUser={currentUser}>
+                        <Home />
+                    </ProtectedRoute>
+                } />
+                <Route path="/home" element={
                     <ProtectedRoute pageName="Home" currentUser={currentUser}>
                         <Home />
                     </ProtectedRoute>
@@ -129,7 +144,18 @@ function PagesContent() {
                     </ProtectedRoute>
                 } />
 
+                <Route path="/people" element={
+                    <ProtectedRoute pageName="People" currentUser={currentUser}>
+                        <People />
+                    </ProtectedRoute>
+                } />
+
                 <Route path="/Tasks" element={
+                    <ProtectedRoute pageName="Tasks" currentUser={currentUser}>
+                        <Tasks />
+                    </ProtectedRoute>
+                } />
+                <Route path="/tasks" element={
                     <ProtectedRoute pageName="Tasks" currentUser={currentUser}>
                         <Tasks />
                     </ProtectedRoute>
@@ -140,8 +166,18 @@ function PagesContent() {
                         <Settings />
                     </ProtectedRoute>
                 } />
+                <Route path="/settings" element={
+                    <ProtectedRoute pageName="Settings" currentUser={currentUser}>
+                        <Settings />
+                    </ProtectedRoute>
+                } />
 
                 <Route path="/Calendar" element={
+                    <ProtectedRoute pageName="Calendar" currentUser={currentUser}>
+                        <Calendar />
+                    </ProtectedRoute>
+                } />
+                <Route path="/calendar" element={
                     <ProtectedRoute pageName="Calendar" currentUser={currentUser}>
                         <Calendar />
                     </ProtectedRoute>
