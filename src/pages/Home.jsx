@@ -20,6 +20,7 @@ import QuickAction from "@/components/dashboard/QuickAction";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 import ActivityItem from "@/components/dashboard/ActivityItem";
 import ExternalWidget from "@/components/dashboard/ExternalWidget";
+import TimeTrackerWidget from "@/components/dashboard/TimeTrackerWidget";
 import DecisionCard from "@/components/decisions/DecisionCard";
 import TaskCard from "@/components/tasks/TaskCard";
 import AnnouncementCard from "@/components/announcements/AnnouncementCard";
@@ -258,15 +259,18 @@ export default function Home() {
             </WidgetCard>
           </div>
 
-          {/* Right Column - External Widgets */}
+          {/* Right Column - Widgets */}
           <div className="space-y-6">
-            <ExternalWidget 
-              type="slack" 
+            {/* Time Tracker for non-managers */}
+            <TimeTrackerWidget currentUser={currentUser} />
+
+            <ExternalWidget
+              type="slack"
               onConvert={(item) => {
                 setShowDecisionForm(true);
               }}
             />
-            <ExternalWidget 
+            <ExternalWidget
               type="email"
               onConvert={(item) => {
                 setShowDecisionForm(true);

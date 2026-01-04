@@ -113,3 +113,4 @@ export const LeaveRequest = new Entity('leaveRequests');
 export const Comment = new Entity('comments');
 export const UserEntity = new Entity('users');
 export const Holiday = new Entity('holidays');
+export const TimeEntry = new Entity('timeEntries');

@@ -1,6 +1,6 @@
 // Local mock client that replaces Base44 SDK
 import { auth } from './mockAuth';
-import { Task, Decision, Announcement, LeaveRequest, Comment, UserEntity, Holiday } from './mockEntities';
+import { Task, Decision, Announcement, LeaveRequest, Comment, UserEntity, Holiday, TimeEntry } from './mockEntities';
 
 // Mock integrations (not fully implemented - add as needed)
 const integrations = {
@@ -29,6 +29,7 @@ export const localClient = {
     Comment,
     User: UserEntity,
     Holiday,
+    TimeEntry,
   },
   integrations,
 };

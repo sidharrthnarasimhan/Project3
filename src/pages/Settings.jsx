@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
+import { getData, setData } from "@/api/mockData";
 import {
   Settings as SettingsIcon,
   Mail,
@@ -33,10 +34,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 export default function Settings() {
   const [currentUser, setCurrentUser] = useState(null);
   const [companyName, setCompanyName] = useState("Startup OS");
+  const [companyLogo, setCompanyLogo] = useState(null);
   const [saving, setSaving] = useState(false);
   const [pagePermissions, setPagePermissions] = useState({});
   const [showHolidayForm, setShowHolidayForm] = useState(false);
   const [newHoliday, setNewHoliday] = useState({ name: '', date: '', type: 'public' });
+  const logoInputRef = useRef(null);
   const queryClient = useQueryClient();
 
   // Integration states (mock for now)
@@ -55,6 +58,16 @@ export default function Settings() {
     // Load page permissions
     const permissions = base44.auth.getPagePermissions();
     setPagePermissions(permissions);
+
+    // Load company settings
+    const user = base44.auth.getCurrentUser();
+    if (user) {
+      const allData = getData();
+      if (allData.companySettings) {
+        setCompanyName(allData.companySettings.name || 'Startup OS');
+        setCompanyLogo(allData.companySettings.logo);
+      }
+    }
   }, []);
 
   const { data: leaveRequests = [] } = useQuery({
@@ -66,6 +79,12 @@ export default function Settings() {
   const { data: holidays = [] } = useQuery({
     queryKey: ["holidays"],
     queryFn: () => base44.entities.Holiday.list(),
+    enabled: !!currentUser?.role && currentUser.role === 'admin',
+  });
+
+  const { data: timeEntries = [] } = useQuery({
+    queryKey: ["timeEntries"],
+    queryFn: () => base44.entities.TimeEntry.list("-created_date"),
     enabled: !!currentUser?.role && currentUser.role === 'admin',
   });
 
@@ -81,12 +100,60 @@ export default function Settings() {
     toast.success(`${service} disconnected`);
   };
 
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size should be less than 2MB");
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCompanyLogo(reader.result);
+      toast.success("Logo uploaded! Don't forget to save changes.");
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read image file");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setCompanyLogo(null);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+    toast.success("Logo removed! Don't forget to save changes.");
+  };
+
   const handleSaveCompany = async () => {
     setSaving(true);
-    // Mock save - in real app would save to settings entity
+
+    // Save to localStorage
+    const data = getData();
+    data.companySettings = {
+      name: companyName,
+      logo: companyLogo,
+    };
+    setData(data);
+
     await new Promise(resolve => setTimeout(resolve, 500));
     setSaving(false);
-    toast.success("Company settings saved");
+
+    // Dispatch custom event to notify Layout component
+    window.dispatchEvent(new Event('companySettingsUpdated'));
+
+    toast.success("Company settings saved!");
   };
 
   const handlePermissionToggle = (pageName, role) => {
@@ -174,13 +241,14 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="integrations" className="space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-3'} max-w-4xl`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-3'} max-w-6xl`}>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="company">Company</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             {isAdmin && <TabsTrigger value="access">Access Control</TabsTrigger>}
             {isAdmin && <TabsTrigger value="leave">Leave Approvals {pendingLeaves.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-purple-600 text-white">{pendingLeaves.length}</span>}</TabsTrigger>}
             {isAdmin && <TabsTrigger value="holidays">Holidays</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="timelogs">Time Logs</TabsTrigger>}
           </TabsList>
 
           {/* Integrations Tab */}
@@ -332,14 +400,45 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label>Logo</Label>
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
-                      <Building2 className="w-8 h-8 text-white" />
+                    {companyLogo ? (
+                      <img
+                        src={companyLogo}
+                        alt="Company logo"
+                        className="w-16 h-16 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 flex items-center justify-center">
+                        <Building2 className="w-8 h-8 text-white" />
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => logoInputRef.current?.click()}
+                      >
+                        Upload Logo
+                      </Button>
+                      {companyLogo && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRemoveLogo}
+                          className="text-rose-600 hover:text-rose-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
-                    <Button variant="outline" size="sm">
-                      Upload Logo
-                    </Button>
                   </div>
-                  <p className="text-xs text-zinc-500">Recommended: Square image, at least 256x256px</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Recommended: Square image, at least 256x256px, max 2MB</p>
                 </div>
 
                 <Button onClick={handleSaveCompany} disabled={saving}>
@@ -699,6 +798,99 @@ export default function Settings() {
                       ))
                     )}
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
+          {/* Time Logs Tab (Admin Only) */}
+          {isAdmin && (
+            <TabsContent value="timelogs" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Employee Time Logs
+                  </CardTitle>
+                  <CardDescription>
+                    View time tracking logs for all non-manager employees
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {timeEntries.length === 0 ? (
+                    <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">
+                      No time entries logged yet
+                    </p>
+                  ) : (() => {
+                    // Aggregate time entries by user
+                    const userTotals = timeEntries.reduce((acc, entry) => {
+                      const email = entry.user_email;
+                      if (!acc[email]) {
+                        acc[email] = {
+                          user_name: entry.user_name,
+                          user_email: email,
+                          total_duration: 0,
+                          session_count: 0,
+                        };
+                      }
+                      acc[email].total_duration += entry.duration;
+                      acc[email].session_count += 1;
+                      return acc;
+                    }, {});
+
+                    const aggregatedData = Object.values(userTotals);
+
+                    return (
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-zinc-200 dark:border-zinc-700">
+                              <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                                Employee
+                              </th>
+                              <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                                Total Sessions
+                              </th>
+                              <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                                Total Time
+                              </th>
+                              <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                                Average Session
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {aggregatedData.map(userData => {
+                              const totalHours = Math.floor(userData.total_duration / (1000 * 60 * 60));
+                              const totalMinutes = Math.floor((userData.total_duration % (1000 * 60 * 60)) / (1000 * 60));
+                              const avgDuration = userData.total_duration / userData.session_count;
+                              const avgHours = Math.floor(avgDuration / (1000 * 60 * 60));
+                              const avgMinutes = Math.floor((avgDuration % (1000 * 60 * 60)) / (1000 * 60));
+
+                              return (
+                                <tr key={userData.user_email} className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                                  <td className="py-3 px-4 text-sm text-zinc-900 dark:text-zinc-100 font-medium">
+                                    {userData.user_name}
+                                  </td>
+                                  <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400">
+                                    {userData.session_count} {userData.session_count === 1 ? 'session' : 'sessions'}
+                                  </td>
+                                  <td className="py-3 px-4">
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300">
+                                      {totalHours}h {totalMinutes}m
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400">
+                                    {avgHours}h {avgMinutes}m
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </TabsContent>

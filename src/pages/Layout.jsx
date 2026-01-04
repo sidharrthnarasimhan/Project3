@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
+import { getData } from "@/api/mockData";
 import {
   LayoutDashboard,
   Vote,
@@ -43,10 +44,39 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [companySettings, setCompanySettings] = useState({ name: 'Startup OS', logo: null });
   const location = useLocation();
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
+
+    // Load company settings from localStorage
+    const loadCompanySettings = () => {
+      try {
+        const data = getData();
+        if (data.companySettings) {
+          setCompanySettings(data.companySettings);
+        }
+      } catch (error) {
+        console.error('Failed to load company settings:', error);
+      }
+    };
+
+    loadCompanySettings();
+
+    // Listen for storage changes (when settings are updated)
+    const handleStorageChange = () => {
+      loadCompanySettings();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Also listen for custom event from Settings page
+    window.addEventListener('companySettingsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('companySettingsUpdated', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -62,11 +92,19 @@ export default function Layout({ children, currentPageName }) {
             {/* Logo & Brand */}
             <div className="flex items-center gap-3">
               <Link to={createPageUrl("Home")} className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-105">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
+                {companySettings.logo ? (
+                  <img
+                    src={companySettings.logo}
+                    alt={companySettings.name}
+                    className="w-10 h-10 rounded-2xl object-cover shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-105">
+                    <Zap className="w-5 h-5 text-white" />
+                  </div>
+                )}
                 <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hidden sm:block">
-                  Startup OS
+                  {companySettings.name}
                 </span>
               </Link>
             </div>

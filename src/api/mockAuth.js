@@ -37,6 +37,20 @@ export const auth = {
         // Don't store password in currentUser
         const { password: _, ...userWithoutPassword } = user;
         data.currentUser = userWithoutPassword;
+
+        // Auto-start timer for non-managers (members and guests)
+        if (user.role === 'member' || user.role === 'guest') {
+          if (!data.activeTimers) {
+            data.activeTimers = {};
+          }
+          // Only start if not already running
+          if (!data.activeTimers[user.email]) {
+            data.activeTimers[user.email] = {
+              start_time: new Date().toISOString(),
+            };
+          }
+        }
+
         setData(data);
         resolve(userWithoutPassword);
       }, 300); // Slightly longer delay to simulate network
@@ -46,11 +60,44 @@ export const auth = {
   // Logout
   logout() {
     const data = getData();
+    const currentUser = data.currentUser;
+
+    // If user has an active timer, stop it and save the time entry
+    if (currentUser && data.activeTimers && data.activeTimers[currentUser.email]) {
+      const activeTimer = data.activeTimers[currentUser.email];
+      const startTime = new Date(activeTimer.start_time);
+      const endTime = new Date();
+      const duration = endTime.getTime() - startTime.getTime();
+
+      // Only save if duration is at least 1 minute
+      if (duration >= 60000) {
+        // Create time entry directly
+        if (!data.timeEntries) {
+          data.timeEntries = [];
+        }
+
+        const newEntry = {
+          id: `time-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          user_email: currentUser.email,
+          user_name: currentUser.full_name,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          duration,
+          created_date: new Date().toISOString(),
+        };
+
+        data.timeEntries.push(newEntry);
+      }
+
+      // Remove active timer
+      delete data.activeTimers[currentUser.email];
+    }
+
     data.currentUser = null;
     setData(data);
 
-    // Reload the page to reset state
-    window.location.href = '/';
+    // Force reload the page to reset state
+    window.location.reload();
   },
 
   // Get current user synchronously

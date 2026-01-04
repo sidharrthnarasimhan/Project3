@@ -1,6 +1,6 @@
 // Mock data store using localStorage for persistence
 const STORAGE_KEY = 'startup_os_data';
-const DATA_VERSION = 2; // Increment this when data structure changes
+const DATA_VERSION = 3; // Increment this when data structure changes
 
 // Initialize default data structure
 const defaultData = {
@@ -179,6 +179,25 @@ const defaultData = {
       created_date: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ],
+  timeEntries: [
+    // Example time entry
+    {
+      id: 'time-1',
+      user_email: 'john@example.com',
+      user_name: 'John Smith',
+      start_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      end_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(),
+      duration: 4 * 60 * 60 * 1000, // 4 hours in milliseconds
+      created_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ],
+  activeTimers: {
+    // Format: { email: { start_time: ISO string } }
+  },
+  companySettings: {
+    name: 'Startup OS',
+    logo: null, // URL to logo image
+  },
   currentUser: null,
 };
 

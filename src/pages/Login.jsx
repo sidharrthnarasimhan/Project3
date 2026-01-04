@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Zap, Eye, EyeOff } from "lucide-react";
+import { getData } from "@/api/mockData";
 
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -14,6 +15,19 @@ export default function Login({ onLoginSuccess }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showDemoUsers, setShowDemoUsers] = useState(false);
+  const [companySettings, setCompanySettings] = useState({ name: 'Startup OS', logo: null });
+
+  // Load company settings on mount
+  useEffect(() => {
+    try {
+      const data = getData();
+      if (data.companySettings) {
+        setCompanySettings(data.companySettings);
+      }
+    } catch (error) {
+      console.error('Failed to load company settings:', error);
+    }
+  }, []);
 
   const demoUsers = [
     { email: "admin@example.com", password: "admin123", role: "Admin", access: "Full access to all pages" },
@@ -58,11 +72,21 @@ export default function Login({ onLoginSuccess }) {
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Header */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 mb-6 shadow-2xl shadow-purple-500/50 animate-glow">
-            <Zap className="w-10 h-10 text-white" />
-          </div>
+          {companySettings.logo ? (
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-2xl animate-glow overflow-hidden">
+              <img
+                src={companySettings.logo}
+                alt={companySettings.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 mb-6 shadow-2xl shadow-purple-500/50 animate-glow">
+              <Zap className="w-10 h-10 text-white" />
+            </div>
+          )}
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            Startup OS
+            {companySettings.name}
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
             ✨ Your workspace awaits
@@ -184,9 +208,18 @@ export default function Login({ onLoginSuccess }) {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-8 animate-in fade-in duration-1000 backdrop-blur-sm">
-          💾 Demo app · All data stored locally
-        </p>
+        <div className="text-center mt-8 space-y-3 animate-in fade-in duration-1000">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 backdrop-blur-sm">
+            💾 Demo app · All data stored locally
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-4xl font-bold text-zinc-400 dark:text-zinc-500">Powered by</span>
+            <span className="inline-flex items-center gap-2 text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <Zap className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              Startup OS
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
