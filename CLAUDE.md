@@ -32,12 +32,12 @@ npm run preview
 The app uses a mock data layer that stores all data in browser localStorage, making it fully functional without any backend server.
 
 **API Layer Structure:**
-- `src/api/mockData.js` - localStorage-based data persistence with default seed data and page permissions
-- `src/api/mockEntities.js` - Entity classes that provide CRUD operations (list, get, create, update, delete)
-- `src/api/mockAuth.js` - Mock authentication system with login/logout and permission checking
-- `src/api/localClient.js` - Local client that mimics the original SDK structure
-- `src/api/base44Client.js` - Re-exports the local client for backwards compatibility
-- `src/api/entities.js` - Exports entity models (Decision, Task, Announcement, LeaveRequest, Comment, User)
+- `src/api/mockData.js` - localStorage-based data persistence with default seed data, page permissions, and data versioning (increment `DATA_VERSION` when schema changes)
+- `src/api/mockEntities.js` - Generic `Entity` class providing CRUD operations (list, get, create, update, delete) with 100ms simulated network delay
+- `src/api/mockAuth.js` - Mock authentication system with login/logout, permission checking, and automatic time tracking
+- `src/api/localClient.js` - Local client that mimics the original SDK structure, exposing `auth`, `entities`, and `integrations`
+- `src/api/base44Client.js` - Re-exports the local client as `base44` for backwards compatibility
+- `src/api/entities.js` - Exports entity models (Decision, Task, Announcement, LeaveRequest, Comment, User, Holiday, TimeEntry)
 - `src/api/integrations.js` - Exports integration utilities (currently mocked with console logs)
 
 **Authentication & Permissions:**
@@ -94,8 +94,9 @@ import { base44 } from '@/api/base44Client'
 - Login page (`src/pages/Login.jsx`) is shown when user is not authenticated
 - Users must provide email and password to log in
 - Current user is fetched using `base44.auth.me()`
-- Logout is handled via `base44.auth.logout()` which clears the session and reloads the page
+- Logout is handled via `base44.auth.logout()` which clears the session, auto-saves time entries (if timer running), and reloads the page
 - Session persists in localStorage across page reloads
+- **Time Tracking:** Members and guests automatically start a timer on login; timer is saved to `timeEntries` on logout (if duration ≥ 1 minute)
 
 **Authorization (Role-Based Access Control):**
 - User roles: `admin`, `manager`, `member`, `guest`
@@ -145,6 +146,14 @@ All entity operations return Promises with simulated network delay (100ms) to mi
 ### Data Persistence
 
 - All data is stored in localStorage under the key `startup_os_data`
-- Default seed data includes sample users, tasks, decisions, announcements, and leave requests
+- Default seed data includes sample users, tasks, decisions, announcements, leave requests, holidays, time entries, and company settings
+- Data includes a `version` field (currently `DATA_VERSION = 3`) for migration support - old data is automatically reset when version changes
 - To reset data to defaults, clear localStorage or call `resetData()` from `src/api/mockData.js` in the console
 - Data persists across page reloads
+
+### Company Branding
+
+- Company name and logo are stored in `companySettings` in localStorage
+- Admins can update company branding via Settings → Company tab
+- Logo upload uses base64 data URLs for storage
+- Layout component (`src/pages/Layout.jsx`) listens for `companySettingsUpdated` custom event to reactively update branding
