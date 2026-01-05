@@ -22,6 +22,7 @@ import {
   DollarSign,
   Rocket,
   BookOpen,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +46,7 @@ const navItems = [
   { name: "Tasks", path: "Tasks", icon: CheckSquare },
   { name: "Announcements", path: "Announcements", icon: Megaphone },
   { name: "People", path: "People", icon: Users },
+  { name: "Health", path: "Health", icon: Activity },
   { name: "Billing", path: "Billing", icon: DollarSign },
   { name: "Settings", path: "Settings", icon: Settings },
 ];

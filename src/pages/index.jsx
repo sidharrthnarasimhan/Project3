@@ -16,6 +16,7 @@ import Billing from "./Billing";
 import Product from "./Product";
 import Spaces from "./Spaces";
 import SpaceDetail from "./SpaceDetail";
+import Health from "./Health";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -42,6 +43,8 @@ const PAGES = {
     Product: Product,
 
     Spaces: Spaces,
+
+    Health: Health,
 
 }
 
@@ -223,6 +226,17 @@ function PagesContent() {
                 <Route path="/spaces" element={
                     <ProtectedRoute pageName="Spaces" currentUser={currentUser}>
                         <Spaces />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/Health" element={
+                    <ProtectedRoute pageName="Health" currentUser={currentUser}>
+                        <Health />
+                    </ProtectedRoute>
+                } />
+                <Route path="/health" element={
+                    <ProtectedRoute pageName="Health" currentUser={currentUser}>
+                        <Health />
                     </ProtectedRoute>
                 } />
 

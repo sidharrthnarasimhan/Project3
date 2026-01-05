@@ -58,6 +58,7 @@ const defaultData = {
     Billing: ['admin'],
     Product: ['admin', 'manager'],
     Spaces: ['admin', 'manager', 'member', 'guest'],
+    Health: ['admin'],
   },
   holidays: [
     {

@@ -49,7 +49,7 @@ export default function Settings() {
     slack: { connected: false, workspace: "" },
   });
 
-  const pages = ['Home', 'Calendar', 'Decisions', 'Tasks', 'Announcements', 'People', 'Settings'];
+  const pages = ['Home', 'Calendar', 'Decisions', 'Tasks', 'Announcements', 'People', 'Settings', 'Health'];
   const roles = ['admin', 'manager', 'member', 'guest'];
 
   useEffect(() => {
