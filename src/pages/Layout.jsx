@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Avatar from "@/components/common/Avatar";
 import ThemeToggle from "@/components/common/ThemeToggle";
+import GlobalSearch from "@/components/common/GlobalSearch";
 
 const navItems = [
   { name: "Home", path: "Home", icon: LayoutDashboard },
@@ -113,6 +114,9 @@ export default function Layout({ children, currentPageName }) {
                 </span>
               </Link>
             </div>
+
+            {/* Center: Global Search */}
+            <GlobalSearch />
 
             {/* Right Side */}
             <div className="flex items-center gap-3">
