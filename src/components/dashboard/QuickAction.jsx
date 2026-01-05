@@ -13,16 +13,16 @@ export default function QuickAction({ title, description, icon: Icon, onClick, c
   return (
     <button
       onClick={onClick}
-      className="group w-full flex items-center gap-4 p-4 rounded-xl bg-white border border-zinc-100 hover:border-zinc-200 hover:shadow-md transition-all duration-200 text-left"
+      className="group w-full flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 hover:border-zinc-200 dark:hover:border-zinc-600 hover:shadow-md transition-all duration-200 text-left"
     >
       <div className={cn("p-3 rounded-xl transition-colors", colorClasses[color])}>
         <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-zinc-900">{title}</p>
-        <p className="text-sm text-zinc-500 truncate">{description}</p>
+        <p className="font-medium text-zinc-900 dark:text-zinc-100">{title}</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{description}</p>
       </div>
-      <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 group-hover:translate-x-1 transition-all" />
+      <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 dark:group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" />
     </button>
   );
 }

@@ -45,43 +45,43 @@ export default function ExternalWidget({ type, onConvert }) {
   const { title, icon: Icon, color, data } = config[type];
 
   return (
-    <div className="rounded-2xl bg-white border border-zinc-100 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+    <div className="rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-700">
         <div className="flex items-center gap-3">
           <div className={cn("p-2 rounded-lg", color)}>
             <Icon className="w-4 h-4" />
           </div>
-          <h3 className="font-semibold text-zinc-900">{title}</h3>
+          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
         </div>
         <Button variant="ghost" size="sm" className="text-xs text-zinc-500 gap-1">
           Open <ExternalLink className="w-3 h-3" />
         </Button>
       </div>
-      <div className="divide-y divide-zinc-50">
+      <div className="divide-y divide-zinc-50 dark:divide-zinc-700">
         {data.map((item, i) => (
-          <div key={i} className="px-5 py-3 hover:bg-zinc-50 transition-colors group">
+          <div key={i} className="px-5 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors group">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 {type === "slack" && (
                   <>
-                    <p className="text-xs font-medium text-indigo-600">{item.channel}</p>
-                    <p className={cn("text-sm truncate", item.unread ? "font-medium text-zinc-900" : "text-zinc-600")}>
+                    <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400">{item.channel}</p>
+                    <p className={cn("text-sm truncate", item.unread ? "font-medium text-zinc-900 dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400")}>
                       {item.message}
                     </p>
                   </>
                 )}
                 {type === "email" && (
                   <>
-                    <p className={cn("text-sm truncate", item.unread ? "font-medium text-zinc-900" : "text-zinc-600")}>
+                    <p className={cn("text-sm truncate", item.unread ? "font-medium text-zinc-900 dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400")}>
                       {item.subject}
                     </p>
-                    <p className="text-xs text-zinc-500">{item.from}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.from}</p>
                   </>
                 )}
                 {type === "calendar" && (
                   <>
-                    <p className="text-sm font-medium text-zinc-900">{item.title}</p>
-                    <p className="text-xs text-zinc-500">{item.time} · {item.duration}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.time} · {item.duration}</p>
                   </>
                 )}
               </div>

@@ -172,9 +172,9 @@ export default function DecisionDetail() {
         </Link>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden mb-6">
+        <div className="bg-white dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 overflow-hidden mb-6">
           {/* Header */}
-          <div className="p-6 border-b border-zinc-100">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-700">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
                 <span className="text-3xl">{categoryIcons[decision.category] || "📌"}</span>
@@ -183,7 +183,7 @@ export default function DecisionDetail() {
                     <StatusBadge status={decision.status} />
                     <StatusBadge status={decision.priority} />
                   </div>
-                  <h1 className="text-2xl font-bold text-zinc-900">{decision.title}</h1>
+                  <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{decision.title}</h1>
                 </div>
               </div>
               <DropdownMenu>
@@ -203,7 +203,7 @@ export default function DecisionDetail() {
 
             <p className="text-zinc-600 dark:text-zinc-300 mt-4 whitespace-pre-wrap">{decision.description}</p>
 
-            <div className="flex items-center gap-6 mt-6 text-sm text-zinc-500">
+            <div className="flex items-center gap-6 mt-6 text-sm text-zinc-500 dark:text-zinc-400">
               <div className="flex items-center gap-2">
                 <Avatar name={getUserInfo(decision.owner)?.full_name} email={decision.owner} size="xs" />
                 <span>{getUserInfo(decision.owner)?.full_name || decision.owner}</span>
@@ -217,8 +217,8 @@ export default function DecisionDetail() {
 
           {/* Voting Section */}
           {(decision.status === "discussion" || decision.status === "voting") && (
-            <div className="p-6 bg-zinc-50/50 border-b border-zinc-100">
-              <h3 className="font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+            <div className="p-6 bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-700">
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
                 <Vote className="w-4 h-4" />
                 Cast Your Vote
               </h3>
@@ -250,8 +250,8 @@ export default function DecisionDetail() {
               </div>
 
               {decision.status === "voting" && currentUser?.email === decision.owner && (
-                <div className="mt-6 pt-6 border-t border-zinc-200">
-                  <h4 className="font-medium text-zinc-900 mb-3">Finalize Decision</h4>
+                <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
+                  <h4 className="font-medium text-zinc-900 dark:text-zinc-100 mb-3">Finalize Decision</h4>
                   <Textarea
                     placeholder="Enter the final decision outcome..."
                     value={outcome}
@@ -277,14 +277,14 @@ export default function DecisionDetail() {
 
           {/* Outcome */}
           {decision.status === "decided" && decision.outcome && (
-            <div className="p-6 bg-emerald-50 border-b border-emerald-100">
-              <h3 className="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+            <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-900/50">
+              <h3 className="font-semibold text-emerald-900 dark:text-emerald-300 mb-2 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4" />
                 Decision Outcome
               </h3>
-              <p className="text-emerald-800">{decision.outcome}</p>
+              <p className="text-emerald-800 dark:text-emerald-200">{decision.outcome}</p>
               {decision.decided_date && (
-                <p className="text-sm text-emerald-600 mt-2">
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2">
                   Decided on {format(new Date(decision.decided_date), "MMMM d, yyyy")}
                 </p>
               )}
@@ -293,7 +293,7 @@ export default function DecisionDetail() {
 
           {/* Comments */}
           <div className="p-6">
-            <h3 className="font-semibold text-zinc-900 mb-4">
+            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
               Discussion ({comments.length})
             </h3>
 
@@ -329,10 +329,10 @@ export default function DecisionDetail() {
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-zinc-900">
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
                         {comment.author_name || comment.author}
                       </span>
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500">
                         {formatDistanceToNow(new Date(comment.created_date), { addSuffix: true })}
                       </span>
                     </div>
@@ -342,7 +342,7 @@ export default function DecisionDetail() {
               ))}
 
               {comments.length === 0 && (
-                <p className="text-center text-zinc-400 py-8">
+                <p className="text-center text-zinc-400 dark:text-zinc-500 py-8">
                   No comments yet. Start the discussion!
                 </p>
               )}

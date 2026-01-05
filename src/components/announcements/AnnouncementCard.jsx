@@ -27,8 +27,8 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
 
   return (
     <div className={cn(
-      "rounded-xl bg-white border p-5 transition-all duration-200",
-      announcement.pinned ? "border-amber-200 bg-amber-50/30" : "border-zinc-100 hover:border-zinc-200"
+      "rounded-xl bg-white dark:bg-zinc-800 border p-5 transition-all duration-200",
+      announcement.pinned ? "border-amber-200 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-900/20" : "border-zinc-100 dark:border-zinc-700 hover:border-zinc-200 dark:hover:border-zinc-600"
     )}>
       <div className="flex items-start gap-4">
         <Avatar name={announcement.author_name} email={announcement.author} size="md" />
@@ -37,14 +37,14 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
           <div className="flex items-start justify-between gap-3 mb-2">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-zinc-900">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                   {announcement.author_name || announcement.author}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300">
                   {config.emoji} {config.label}
                 </span>
               </div>
-              <span className="text-xs text-zinc-400">
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">
                 {formatDistanceToNow(new Date(announcement.created_date), { addSuffix: true })}
               </span>
             </div>
@@ -53,8 +53,8 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
             )}
           </div>
 
-          <h3 className="font-semibold text-zinc-900 mb-2">{announcement.title}</h3>
-          <p className="text-zinc-600 text-sm whitespace-pre-wrap">{announcement.content}</p>
+          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{announcement.title}</h3>
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm whitespace-pre-wrap">{announcement.content}</p>
 
           <div className="flex items-center gap-2 mt-4 flex-wrap">
             {emojis.map(emoji => (
@@ -63,9 +63,9 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
                 onClick={() => onReact && onReact(emoji)}
                 className={cn(
                   "flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-all",
-                  userReaction === emoji 
-                    ? "bg-indigo-100 text-indigo-700" 
-                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  userReaction === emoji
+                    ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                    : "bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600"
                 )}
               >
                 {emoji}
