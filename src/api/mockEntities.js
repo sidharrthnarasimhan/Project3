@@ -10,7 +10,7 @@ class Entity {
     return new Promise((resolve) => {
       setTimeout(() => {
         const data = getData();
-        let items = [...data[this.entityName]];
+        let items = [...(data[this.entityName] || [])];
 
         // Handle sorting
         if (sortBy) {
@@ -114,3 +114,5 @@ export const Comment = new Entity('comments');
 export const UserEntity = new Entity('users');
 export const Holiday = new Entity('holidays');
 export const TimeEntry = new Entity('timeEntries');
+export const BillingTool = new Entity('billingTools');
+export const Milestone = new Entity('milestones');

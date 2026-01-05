@@ -19,6 +19,8 @@ import {
   ChevronDown,
   Zap,
   Calendar,
+  DollarSign,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,11 +35,13 @@ import ThemeToggle from "@/components/common/ThemeToggle";
 
 const navItems = [
   { name: "Home", path: "Home", icon: LayoutDashboard },
+  { name: "Product", path: "Product", icon: Rocket },
   { name: "Calendar", path: "Calendar", icon: Calendar },
   { name: "Decisions", path: "Decisions", icon: Vote },
   { name: "Tasks", path: "Tasks", icon: CheckSquare },
   { name: "Announcements", path: "Announcements", icon: Megaphone },
   { name: "People", path: "People", icon: Users },
+  { name: "Billing", path: "Billing", icon: DollarSign },
   { name: "Settings", path: "Settings", icon: Settings },
 ];
 
@@ -88,6 +92,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/60 dark:bg-zinc-800/80 border-b border-white/20 dark:border-zinc-700/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Row: Logo and User Menu */}
           <div className="flex items-center justify-between h-16">
             {/* Logo & Brand */}
             <div className="flex items-center gap-3">
@@ -108,33 +113,6 @@ export default function Layout({ children, currentPageName }) {
                 </span>
               </Link>
             </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const isActive = currentPageName === item.path;
-                const hasAccess = base44.auth.hasPageAccess(item.path);
-
-                // Don't show nav items user doesn't have access to
-                if (!hasAccess) return null;
-
-                return (
-                  <Link
-                    key={item.path}
-                    to={createPageUrl(item.path)}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30"
-                        : "text-zinc-700 dark:text-zinc-300 hover:bg-white/60 dark:hover:bg-zinc-800/60 hover:text-purple-600 dark:hover:text-purple-400"
-                    )}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </nav>
 
             {/* Right Side */}
             <div className="flex items-center gap-3">
@@ -195,6 +173,35 @@ export default function Layout({ children, currentPageName }) {
                 )}
               </Button>
             </div>
+          </div>
+
+          {/* Bottom Row: Desktop Navigation */}
+          <div className="hidden md:block border-t border-white/20 dark:border-zinc-700/50">
+            <nav className="flex items-center justify-center gap-1 py-2">
+              {navItems.map((item) => {
+                const isActive = currentPageName === item.path;
+                const hasAccess = base44.auth.hasPageAccess(item.path);
+
+                // Don't show nav items user doesn't have access to
+                if (!hasAccess) return null;
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={createPageUrl(item.path)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30"
+                        : "text-zinc-700 dark:text-zinc-300 hover:bg-white/60 dark:hover:bg-zinc-800/60 hover:text-purple-600 dark:hover:text-purple-400"
+                    )}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
         </div>
 

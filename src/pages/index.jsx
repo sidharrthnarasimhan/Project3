@@ -12,6 +12,8 @@ import People from "./People";
 import Tasks from "./Tasks";
 import Settings from "./Settings";
 import Calendar from "./Calendar";
+import Billing from "./Billing";
+import Product from "./Product";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -32,6 +34,10 @@ const PAGES = {
     Settings: Settings,
 
     Calendar: Calendar,
+
+    Billing: Billing,
+
+    Product: Product,
 
 }
 
@@ -180,6 +186,28 @@ function PagesContent() {
                 <Route path="/calendar" element={
                     <ProtectedRoute pageName="Calendar" currentUser={currentUser}>
                         <Calendar />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/Billing" element={
+                    <ProtectedRoute pageName="Billing" currentUser={currentUser}>
+                        <Billing />
+                    </ProtectedRoute>
+                } />
+                <Route path="/billing" element={
+                    <ProtectedRoute pageName="Billing" currentUser={currentUser}>
+                        <Billing />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/Product" element={
+                    <ProtectedRoute pageName="Product" currentUser={currentUser}>
+                        <Product />
+                    </ProtectedRoute>
+                } />
+                <Route path="/product" element={
+                    <ProtectedRoute pageName="Product" currentUser={currentUser}>
+                        <Product />
                     </ProtectedRoute>
                 } />
             </Routes>
