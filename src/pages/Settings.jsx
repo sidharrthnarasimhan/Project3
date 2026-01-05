@@ -28,6 +28,8 @@ import {
   X,
   Plus,
   Trash2,
+  RotateCcw,
+  AlertTriangle,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -51,6 +53,21 @@ export default function Settings() {
 
   const pages = ['Home', 'Calendar', 'Decisions', 'Tasks', 'Announcements', 'People', 'Settings', 'Health'];
   const roles = ['admin', 'manager', 'member', 'guest'];
+
+  const handleResetAllData = () => {
+    if (confirm('⚠️ WARNING: This will delete ALL data including users, decisions, tasks, and settings. This action cannot be undone.\n\nAre you absolutely sure?')) {
+      // Clear all localStorage
+      localStorage.clear();
+
+      // Show toast
+      toast.success('All data has been reset. Redirecting to login...');
+
+      // Reload page after a short delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    }
+  };
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
@@ -241,7 +258,7 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="integrations" className="space-y-6">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-3'} max-w-6xl`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-4'} max-w-6xl`}>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="company">Company</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
@@ -249,6 +266,7 @@ export default function Settings() {
             {isAdmin && <TabsTrigger value="leave">Leave Approvals {pendingLeaves.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-purple-600 text-white">{pendingLeaves.length}</span>}</TabsTrigger>}
             {isAdmin && <TabsTrigger value="holidays">Holidays</TabsTrigger>}
             {isAdmin && <TabsTrigger value="timelogs">Time Logs</TabsTrigger>}
+            <TabsTrigger value="developer">Developer</TabsTrigger>
           </TabsList>
 
           {/* Integrations Tab */}
@@ -895,6 +913,71 @@ export default function Settings() {
               </Card>
             </TabsContent>
           )}
+
+          {/* Developer Tab */}
+          <TabsContent value="developer" className="space-y-4">
+            <Card className="border-red-200 dark:border-red-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <AlertTriangle className="w-5 h-5" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription>
+                  These actions are irreversible. Use with caution.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                        Reset All Data
+                      </h4>
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+                        This will delete all users, decisions, tasks, announcements, settings, and other data. You will be logged out and redirected to the login page.
+                      </p>
+                      <ul className="text-xs text-zinc-500 dark:text-zinc-400 space-y-1 list-disc list-inside mb-4">
+                        <li>All localStorage data will be cleared</li>
+                        <li>You will need to create a new account</li>
+                        <li>This action cannot be undone</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleResetAllData}
+                    variant="destructive"
+                    className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset All Data
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Developer Information</CardTitle>
+                <CardDescription>
+                  Technical details about the application
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+                  <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">Storage Key</p>
+                  <p className="text-sm font-mono text-zinc-900 dark:text-zinc-100">startup_os_data</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+                  <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">Data Version</p>
+                  <p className="text-sm font-mono text-zinc-900 dark:text-zinc-100">7</p>
+                </div>
+                <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+                  <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">Environment</p>
+                  <p className="text-sm font-mono text-zinc-900 dark:text-zinc-100">Development (Mock Client)</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

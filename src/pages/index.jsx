@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { base44 } from "@/api/base44Client";
+import { isUsingMockClient } from "@/api/clientSelector";
 import Layout from "./Layout.jsx";
 import Login from "./Login";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
@@ -17,6 +19,7 @@ import Product from "./Product";
 import Spaces from "./Spaces";
 import SpaceDetail from "./SpaceDetail";
 import Health from "./Health";
+import CreateOrganization from "./CreateOrganization";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -68,21 +71,51 @@ function PagesContent() {
     const [currentUser, setCurrentUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Get Clerk user if using HTTP client
+    const { isLoaded: clerkLoaded, isSignedIn, user: clerkUser } = useUser();
+    const usingMock = isUsingMockClient();
+
     useEffect(() => {
-        // Check if user is authenticated
-        base44.auth.me()
-            .then(user => {
-                setCurrentUser(user);
+        // If using HTTP client, wait for Clerk to load
+        if (!usingMock) {
+            if (clerkLoaded) {
+                // Only set user if actually signed in with valid Clerk session
+                if (isSignedIn && clerkUser && window.Clerk && window.Clerk.user) {
+                    // Convert Clerk user to our format
+                    setCurrentUser({
+                        id: clerkUser.id,
+                        email: clerkUser.primaryEmailAddress?.emailAddress,
+                        full_name: clerkUser.fullName || clerkUser.firstName || 'User',
+                        avatar_url: clerkUser.imageUrl,
+                        role: 'member', // Will be fetched from backend
+                    });
+                } else {
+                    // Not signed in - clear user
+                    setCurrentUser(null);
+                }
                 setIsLoading(false);
-            })
-            .catch(() => {
-                setCurrentUser(null);
-                setIsLoading(false);
-            });
-    }, []);
+            }
+        } else {
+            // Using mock client - check base44 auth
+            base44.auth.me()
+                .then(user => {
+                    setCurrentUser(user);
+                    setIsLoading(false);
+                })
+                .catch(() => {
+                    setCurrentUser(null);
+                    setIsLoading(false);
+                });
+        }
+    }, [clerkLoaded, isSignedIn, clerkUser, usingMock]);
 
     const handleLoginSuccess = () => {
         // Reload to get current user
+        window.location.reload();
+    };
+
+    const handleOrganizationCreated = (org) => {
+        // Reload to refresh with new organization
         window.location.reload();
     };
 
@@ -101,6 +134,14 @@ function PagesContent() {
     // Show login if not authenticated
     if (!currentUser) {
         return <Login onLoginSuccess={handleLoginSuccess} />;
+    }
+
+    // Check if user has an organization (only for HTTP client mode)
+    if (!usingMock && currentUser) {
+        const currentOrgId = localStorage.getItem('current_org_id');
+        if (!currentOrgId) {
+            return <CreateOrganization onSuccess={handleOrganizationCreated} />;
+        }
     }
 
     return (

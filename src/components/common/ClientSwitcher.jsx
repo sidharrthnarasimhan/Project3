@@ -17,11 +17,11 @@ export default function ClientSwitcher() {
     return null;
   }
 
-  const handleSwitch = (useMock) => {
+  const handleSwitch = async (useMock) => {
     if (useMock) {
       useMockClient();
     } else {
-      useHttpClient();
+      await useHttpClient();
     }
   };
 

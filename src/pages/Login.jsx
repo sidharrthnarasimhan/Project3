@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { isUsingMockClient } from "@/api/clientSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Zap, Eye, EyeOff } from "lucide-react";
 import { getData } from "@/api/mockData";
+import ClientSwitcher from "@/components/common/ClientSwitcher";
+import ClerkLogin from "@/components/common/ClerkLogin";
 
 export default function Login({ onLoginSuccess }) {
+  // If using HTTP client, show Clerk login instead
+  if (!isUsingMockClient()) {
+    return <ClerkLogin />;
+  }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -42,9 +49,14 @@ export default function Login({ onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      await base44.auth.login(email, password);
-      if (onLoginSuccess) {
-        onLoginSuccess();
+      // Only use base44.auth.login for mock client
+      if (isUsingMockClient() && base44.auth.login) {
+        await base44.auth.login(email, password);
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+      } else {
+        setError("Please use Clerk authentication when HTTP client is enabled. Switch to Mock Client to use demo accounts.");
       }
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
@@ -68,6 +80,9 @@ export default function Login({ onLoginSuccess }) {
       <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500/30 rounded-full blur-3xl animate-float"></div>
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }}></div>
       <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-6s' }}></div>
+
+      {/* Client Switcher - visible on login page */}
+      <ClientSwitcher />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Header */}

@@ -33,8 +33,19 @@ export const getCurrentClient = () => selectClient();
 /**
  * Switch to HTTP client
  */
-export const useHttpClient = () => {
+export const useHttpClient = async () => {
+  // Sign out from Clerk if there's an active session
+  if (window.Clerk) {
+    try {
+      await window.Clerk.signOut();
+    } catch (e) {
+      // Ignore errors
+    }
+  }
+
   localStorage.setItem('USE_MOCK_CLIENT', 'false');
+  // Clear any stale organization context
+  localStorage.removeItem('current_org_id');
   window.location.reload();
 };
 

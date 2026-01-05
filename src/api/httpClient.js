@@ -7,13 +7,19 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 /**
  * Get auth token from Clerk
- * This should be replaced with actual Clerk integration
  */
 async function getAuthToken() {
-  // TODO: Integrate with Clerk to get real token
-  // For now, return placeholder for development
-  const token = localStorage.getItem('dev_auth_token');
-  return token;
+  // Get token from Clerk if available
+  if (window.Clerk && window.Clerk.session) {
+    try {
+      const token = await window.Clerk.session.getToken();
+      return token;
+    } catch (error) {
+      console.error('Failed to get Clerk token:', error);
+      return null;
+    }
+  }
+  return null;
 }
 
 /**
@@ -113,36 +119,48 @@ class HttpEntity {
  */
 const auth = {
   async me() {
-    // TODO: Implement with Clerk
-    // For now, return mock user from localStorage
-    const user = JSON.parse(localStorage.getItem('current_user') || 'null');
-    if (!user) {
-      throw new Error('Not authenticated');
+    // Get user from Clerk
+    if (window.Clerk && window.Clerk.user) {
+      const clerkUser = window.Clerk.user;
+      return {
+        id: clerkUser.id,
+        email: clerkUser.primaryEmailAddress?.emailAddress,
+        full_name: clerkUser.fullName || clerkUser.firstName || 'User',
+        avatar_url: clerkUser.imageUrl,
+        role: 'member', // Default role, should come from database
+      };
     }
-    return user;
+    throw new Error('Not authenticated');
   },
 
   async logout() {
-    // Clear local storage and reload
-    localStorage.removeItem('current_user');
+    // Sign out from Clerk
+    if (window.Clerk) {
+      await window.Clerk.signOut();
+    }
+    // Clear org context
     localStorage.removeItem('current_org_id');
-    localStorage.removeItem('dev_auth_token');
-    window.location.reload();
+    window.location.href = '/';
   },
 
   hasPageAccess(pageName) {
-    // TODO: Implement with real permissions
+    // For now, allow all pages (will be controlled by backend)
     return true;
   },
 
   async updatePagePermissions(pageName, allowedRoles) {
-    // TODO: Implement
-    return { success: true };
+    // This will be handled by backend API
+    const orgId = localStorage.getItem('current_org_id');
+    return request(`/orgs/${orgId}/page-permissions/${pageName}`, {
+      method: 'PUT',
+      body: JSON.stringify({ allowed_roles: allowedRoles }),
+    });
   },
 
   async getPagePermissions() {
-    // TODO: Implement
-    return {};
+    // Get from backend API
+    const orgId = localStorage.getItem('current_org_id');
+    return request(`/orgs/${orgId}/page-permissions`);
   },
 };
 
