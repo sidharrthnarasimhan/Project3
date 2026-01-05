@@ -21,6 +21,7 @@ import {
   Calendar,
   DollarSign,
   Rocket,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +38,7 @@ import GlobalSearch from "@/components/common/GlobalSearch";
 const navItems = [
   { name: "Home", path: "Home", icon: LayoutDashboard },
   { name: "Product", path: "Product", icon: Rocket },
+  { name: "Spaces", path: "Spaces", icon: BookOpen },
   { name: "Calendar", path: "Calendar", icon: Calendar },
   { name: "Decisions", path: "Decisions", icon: Vote },
   { name: "Tasks", path: "Tasks", icon: CheckSquare },

@@ -1,6 +1,6 @@
 // Mock data store using localStorage for persistence
 const STORAGE_KEY = 'startup_os_data';
-const DATA_VERSION = 6; // Increment this when data structure changes
+const DATA_VERSION = 7; // Increment this when data structure changes
 
 // Initialize default data structure
 const defaultData = {
@@ -57,6 +57,7 @@ const defaultData = {
     Settings: ['admin', 'manager', 'member', 'guest'],
     Billing: ['admin'],
     Product: ['admin', 'manager'],
+    Spaces: ['admin', 'manager', 'member', 'guest'],
   },
   holidays: [
     {
@@ -443,6 +444,44 @@ const defaultData = {
       category: 'engineering',
       owner: 'admin@example.com',
       created_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ],
+  spaces: [
+    {
+      id: 'space-1',
+      title: 'Engineering Wiki',
+      description: 'Technical documentation, architecture decisions, and development guidelines',
+      content: '<h2>Welcome to Engineering Wiki</h2><p>This space contains all our technical documentation and best practices.</p><h3>Quick Links</h3><ul><li>Architecture Overview</li><li>Coding Standards</li><li>Deployment Guide</li></ul>',
+      owner: 'admin@example.com',
+      owner_name: 'Admin User',
+      allowed_users: ['admin@example.com', 'john@example.com', 'jane@example.com'], // Specific users with access
+      is_public: false, // If true, all users can view
+      created_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'space-2',
+      title: 'Product Documentation',
+      description: 'Product specs, user research, and feature requirements',
+      content: '<h2>Product Documentation</h2><p>Everything related to our product strategy and roadmap.</p><h3>Current Focus</h3><p>Q1 2026: User onboarding and collaboration features</p>',
+      owner: 'jane@example.com',
+      owner_name: 'Jane Doe',
+      allowed_users: ['admin@example.com', 'jane@example.com', 'manager@example.com'],
+      is_public: false,
+      created_date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'space-3',
+      title: 'Company Handbook',
+      description: 'Company policies, benefits, and culture information',
+      content: '<h2>Welcome to Our Company</h2><p>This handbook contains everything you need to know about working here.</p><h3>Our Values</h3><ul><li>Transparency</li><li>Collaboration</li><li>Innovation</li></ul>',
+      owner: 'admin@example.com',
+      owner_name: 'Admin User',
+      allowed_users: [],
+      is_public: true, // Everyone can see this
+      created_date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ],
   companySettings: {

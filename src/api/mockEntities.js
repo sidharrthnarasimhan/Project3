@@ -116,3 +116,4 @@ export const Holiday = new Entity('holidays');
 export const TimeEntry = new Entity('timeEntries');
 export const BillingTool = new Entity('billingTools');
 export const Milestone = new Entity('milestones');
+export const Space = new Entity('spaces');

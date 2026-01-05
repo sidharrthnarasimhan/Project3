@@ -14,6 +14,8 @@ import Settings from "./Settings";
 import Calendar from "./Calendar";
 import Billing from "./Billing";
 import Product from "./Product";
+import Spaces from "./Spaces";
+import SpaceDetail from "./SpaceDetail";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -38,6 +40,8 @@ const PAGES = {
     Billing: Billing,
 
     Product: Product,
+
+    Spaces: Spaces,
 
 }
 
@@ -210,6 +214,20 @@ function PagesContent() {
                         <Product />
                     </ProtectedRoute>
                 } />
+
+                <Route path="/Spaces" element={
+                    <ProtectedRoute pageName="Spaces" currentUser={currentUser}>
+                        <Spaces />
+                    </ProtectedRoute>
+                } />
+                <Route path="/spaces" element={
+                    <ProtectedRoute pageName="Spaces" currentUser={currentUser}>
+                        <Spaces />
+                    </ProtectedRoute>
+                } />
+
+                {/* Space detail route - opens in new tab, no layout wrapper needed */}
+                <Route path="/space/:spaceId" element={<SpaceDetail />} />
             </Routes>
         </Layout>
     );

@@ -37,7 +37,7 @@ The app uses a mock data layer that stores all data in browser localStorage, mak
 - `src/api/mockAuth.js` - Mock authentication system with login/logout, permission checking, and automatic time tracking
 - `src/api/localClient.js` - Local client that mimics the original SDK structure, exposing `auth`, `entities`, and `integrations`
 - `src/api/base44Client.js` - Re-exports the local client as `base44` for backwards compatibility
-- `src/api/entities.js` - Exports entity models (Decision, Task, Announcement, LeaveRequest, Comment, User, Holiday, TimeEntry, BillingTool, Milestone)
+- `src/api/entities.js` - Exports entity models (Decision, Task, Announcement, LeaveRequest, Comment, User, Holiday, TimeEntry, BillingTool, Milestone, Space)
 - `src/api/integrations.js` - Exports integration utilities (currently mocked with console logs)
 
 **Authentication & Permissions:**
@@ -66,9 +66,12 @@ The app uses React Router with a custom routing system:
 
 - `src/components/ui/` - Shadcn/ui components (Dialog, Button, Avatar, etc.)
 - `src/components/common/` - Shared application components
-- `src/components/{domain}/` - Feature-specific components organized by domain (announcements, decisions, tasks, people, dashboard, billing, product)
+- `src/components/{domain}/` - Feature-specific components organized by domain (announcements, decisions, tasks, people, dashboard, billing, product, spaces)
 - `src/pages/` - Page-level components that compose UI components and handle routing
-- `src/pages/Layout.jsx` - Main layout wrapper with navigation, header, user menu, and dynamic company branding
+- `src/pages/Layout.jsx` - Main layout wrapper with navigation, header, user menu, global search, and dynamic company branding
+
+**Common Components:**
+- `src/components/common/GlobalSearch.jsx` - Header search bar that searches across tasks, decisions, announcements, and people with dropdown results
 
 **Product Dashboard Components:**
 - `src/components/product/ProductStats.jsx` - Key metrics cards (Overall Progress, Decisions, Tasks, Velocity)
@@ -78,6 +81,10 @@ The app uses React Router with a custom routing system:
 - `src/components/product/GraphView.jsx` - Dependency graph showing decision-task relationships
 - `src/components/product/TimelineView.jsx` - Chronological timeline of decisions, tasks, and milestones
 - `src/components/product/ViewToggle.jsx` - Tab switcher for 4 visualization modes
+
+**Spaces Components:**
+- `src/components/spaces/SpaceEditor.jsx` - Rich text editor with formatting toolbar (Bold, Italic, Headings, Lists, Links, Code, Quotes)
+- `src/components/spaces/SpaceView.jsx` - Rendered HTML content viewer with prose styling
 
 ### UI Framework
 
@@ -155,8 +162,8 @@ All entity operations return Promises with simulated network delay (100ms) to mi
 ### Data Persistence
 
 - All data is stored in localStorage under the key `startup_os_data`
-- Default seed data includes sample users, tasks, decisions, announcements, leave requests, holidays, time entries, milestones, billing tools, and company settings
-- Data includes a `version` field (currently `DATA_VERSION = 6`) for migration support - old data is automatically reset when version changes
+- Default seed data includes sample users, tasks, decisions, announcements, leave requests, holidays, time entries, milestones, billing tools, spaces, and company settings
+- Data includes a `version` field (currently `DATA_VERSION = 7`) for migration support - old data is automatically reset when version changes
 - **IMPORTANT:** When adding new entities or changing data structure, always increment `DATA_VERSION` in `src/api/mockData.js` to force a localStorage reset
 - To reset data to defaults manually, clear localStorage (`localStorage.clear()` in console) or call `resetData()` from `src/api/mockData.js`
 - Data persists across page reloads
@@ -214,6 +221,54 @@ Admins can manage billing tools and subscriptions used by the startup:
 - Main page: `src/pages/Billing.jsx`
 - Components: `src/components/billing/*`
 - Data: BillingTool entity from mockData.js
+
+### Spaces (Confluence-like Documentation)
+
+**Access:** All roles (but individual spaces have granular access control)
+
+A Confluence-like documentation system where users can create and share rich-text documentation spaces:
+
+**Features:**
+- Create documentation spaces with rich text editor
+- Full blog-style formatting: headings, bold, italic, lists, links, code blocks, quotes
+- Access control per space:
+  - **Public spaces**: Visible to all users
+  - **Private spaces**: Owner chooses which users can access
+  - **Admin approval**: Admins can manage access for any space
+- Opens in new tab for focused reading/editing
+- Edit mode for space owners and admins
+- Visual indicators for public (Globe) vs private (Lock) spaces
+
+**Data Structure:**
+- Spaces include `title`, `description`, `content` (HTML), `owner`, `owner_name`, `allowed_users` (array), `is_public` (boolean)
+- Each user gets their own space access based on ownership or allowed_users list
+- Admins can always view and manage all spaces
+
+**Implementation Files:**
+- Main page: `src/pages/Spaces.jsx` (listing and creation)
+- Detail page: `src/pages/SpaceDetail.jsx` (opens in new tab, view/edit mode)
+- Components: `src/components/spaces/SpaceEditor.jsx`, `src/components/spaces/SpaceView.jsx`
+- Data: Space entity from mockData.js
+
+### Global Search
+
+**Location:** Header (between company logo and user menu)
+
+A global search feature that searches across multiple entities in real-time:
+
+**Features:**
+- Searches tasks (title, description)
+- Searches decisions (title, description)
+- Searches announcements (title, content)
+- Searches people (name, email, role)
+- Live dropdown results with color-coded icons
+- Click to navigate to relevant page
+- Limited to 8 results for clean UI
+- Click outside or press X to close
+
+**Implementation:**
+- Component: `src/components/common/GlobalSearch.jsx`
+- Integrated in: `src/pages/Layout.jsx`
 
 ## Common Patterns & Best Practices
 
