@@ -34,6 +34,7 @@ import {
 import Avatar from "@/components/common/Avatar";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import GlobalSearch from "@/components/common/GlobalSearch";
+import ClientSwitcher from "@/components/common/ClientSwitcher";
 
 const navItems = [
   { name: "Home", path: "Home", icon: LayoutDashboard },
@@ -246,6 +247,9 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Main Content */}
       <main>{children}</main>
+
+      {/* Client Switcher (dev only) */}
+      <ClientSwitcher />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-// Local development client (replaces Base44 SDK)
-import { localClient } from './localClient';
+// Export selected client (mock or HTTP) as base44
+// Use clientSelector to switch between mock and real API
+import { getCurrentClient } from './clientSelector.js';
 
-// Export local client as base44 for backwards compatibility
-export const base44 = localClient;
+export const base44 = getCurrentClient();
