@@ -6,6 +6,7 @@
 import { authenticate } from '../middleware/auth.js';
 import { successResponse, errorResponse } from '../utils/responses.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
+import { sendInvitationEmail, sendWelcomeEmail } from '../utils/emailService.js';
 
 export async function invitationRoutes(fastify, options) {
   const db = fastify.db;
@@ -69,6 +70,17 @@ export async function invitationRoutes(fastify, options) {
       throw new BadRequestError('User is already a member of this organization');
     }
 
+    // Get organization details and inviter info
+    const orgQuery = await db.query(
+      'SELECT name FROM organizations WHERE id = $1',
+      [orgId]
+    );
+
+    const inviterQuery = await db.query(
+      'SELECT full_name, email FROM users WHERE clerk_user_id = $1',
+      [clerkUserId]
+    );
+
     // Create invitation
     const result = await db.query(
       `INSERT INTO invitations (organization_id, email, role, invited_by)
@@ -77,9 +89,26 @@ export async function invitationRoutes(fastify, options) {
       [orgId, email.toLowerCase(), role, clerkUserId]
     );
 
-    fastify.log.info({ email, orgId, role }, 'Invitation created');
+    const invitation = result.rows[0];
 
-    return reply.code(201).send(successResponse(result.rows[0], 'Invitation sent'));
+    // Send invitation email
+    try {
+      const invitationLink = `${process.env.FRONTEND_URL}/accept-invitation?token=${invitation.id}`;
+      await sendInvitationEmail({
+        inviterName: inviterQuery.rows[0]?.full_name || 'Team Admin',
+        inviterEmail: inviterQuery.rows[0]?.email || '',
+        inviteeEmail: email.toLowerCase(),
+        organizationName: orgQuery.rows[0]?.name || 'the organization',
+        role: role,
+        invitationLink: invitationLink
+      });
+      fastify.log.info({ email, orgId, role }, 'Invitation created and email sent');
+    } catch (emailError) {
+      // Log email error but don't fail the invitation creation
+      fastify.log.error({ error: emailError.message }, 'Failed to send invitation email');
+    }
+
+    return reply.code(201).send(successResponse(invitation, 'Invitation sent'));
   });
 
   /**

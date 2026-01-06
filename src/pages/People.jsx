@@ -134,7 +134,17 @@ export default function People() {
     return true;
   });
 
-  const isAdmin = currentUser?.role === "admin";
+  // Get user's role from organization membership (for production mode)
+  const getCurrentUserRole = () => {
+    if (usingMock) {
+      return currentUser?.role;
+    }
+    // Find current user in members list to get their org-specific role
+    const currentMember = members.find(m => m.email === currentUser?.email);
+    return currentMember?.role || currentUser?.role;
+  };
+
+  const isAdmin = getCurrentUserRole() === "admin";
 
   const handleCreateLeave = async (data) => {
     await base44.entities.LeaveRequest.create({
