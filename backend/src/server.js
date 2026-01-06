@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import 'dotenv/config';
 import db from './db/index.js';
+import { userRoutes } from './routes/users.js';
 import organizationRoutes from './routes/organizations.js';
 import decisionRoutes from './routes/decisions.js';
 import taskRoutes from './routes/tasks.js';
@@ -35,6 +36,9 @@ await fastify.register(cors, {
   credentials: true,
 });
 
+// Register database as a decorator
+fastify.decorate('db', db);
+
 // Health check endpoint
 fastify.get('/health', async (request, reply) => {
   const dbHealth = await db.healthCheck();
@@ -57,6 +61,7 @@ fastify.get('/', async (request, reply) => {
 });
 
 // Register routes
+fastify.register(userRoutes, { prefix: '/api' });
 fastify.register(organizationRoutes, { prefix: '/api' });
 fastify.register(decisionRoutes, { prefix: '/api' });
 fastify.register(taskRoutes, { prefix: '/api' });

@@ -29,10 +29,37 @@ export default function CreateOrganization({ onSuccess }) {
     setIsLoading(true);
 
     try {
-      // Get Clerk token
+      // Get Clerk token and user info
       const token = await window.Clerk.session.getToken();
+      const clerkUser = window.Clerk.user;
 
-      // Create organization
+      // Step 1: Register/sync user in backend
+      try {
+        const userResponse = await fetch('http://localhost:3001/api/users/sync', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            clerk_id: clerkUser.id,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            full_name: clerkUser.fullName || clerkUser.firstName || 'User',
+            avatar_url: clerkUser.imageUrl,
+          })
+        });
+
+        if (!userResponse.ok && userResponse.status !== 409) {
+          // 409 Conflict means user already exists, which is OK
+          const errorData = await userResponse.json();
+          throw new Error(errorData.error?.message || 'Failed to create user');
+        }
+      } catch (userErr) {
+        console.warn('User sync error:', userErr);
+        // Continue anyway - user might already exist
+      }
+
+      // Step 2: Create organization
       const response = await fetch('http://localhost:3001/api/orgs', {
         method: 'POST',
         headers: {
