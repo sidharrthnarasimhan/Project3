@@ -52,13 +52,22 @@ export default function ClerkLogin() {
                 footerActionLink: "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold underline",
                 identityPreviewText: "text-zinc-900 dark:text-zinc-100",
                 identityPreviewEditButtonIcon: "text-zinc-600 dark:text-zinc-400",
+                alternativeMethodsBlockButton: "bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700",
+                alternativeMethodsBlockButtonText: "text-zinc-900 dark:text-zinc-100",
+                formResendCodeLink: "text-purple-600 dark:text-purple-400",
+                otpCodeFieldInput: "bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700",
+                // Hide "last used" and similar metadata
+                formFieldInfoText: "hidden",
+                formFieldSuccessText: "hidden",
+                formFieldHintText: "hidden",
+                identityPreviewEditButton: "hidden",
               }
             }}
             routing="virtual"
-            afterSignInUrl="/"
-            afterSignUpUrl="/"
-            signUpForceRedirectUrl="/"
-            signInForceRedirectUrl="/"
+            afterSignInUrl="/home"
+            afterSignUpUrl="/home"
+            signUpForceRedirectUrl="/home"
+            signInForceRedirectUrl="/home"
           />
         </div>
 

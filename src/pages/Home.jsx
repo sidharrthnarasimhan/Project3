@@ -21,6 +21,7 @@ import WidgetCard from "@/components/dashboard/WidgetCard";
 import ActivityItem from "@/components/dashboard/ActivityItem";
 import ExternalWidget from "@/components/dashboard/ExternalWidget";
 import TimeTrackerWidget from "@/components/dashboard/TimeTrackerWidget";
+import OnboardingChecklist from "@/components/people/OnboardingChecklist";
 import DecisionCard from "@/components/decisions/DecisionCard";
 import TaskCard from "@/components/tasks/TaskCard";
 import AnnouncementCard from "@/components/announcements/AnnouncementCard";
@@ -163,6 +164,13 @@ export default function Home() {
             onClick={() => window.location.href = createPageUrl("People")}
           />
         </div>
+
+        {/* Onboarding Checklist - Shows for all users */}
+        {currentUser && (
+          <div className="mb-6">
+            <OnboardingChecklist currentUser={currentUser} compact={true} />
+          </div>
+        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -52,9 +52,8 @@ export default function Login({ onLoginSuccess }) {
       // Only use base44.auth.login for mock client
       if (isUsingMockClient() && base44.auth.login) {
         await base44.auth.login(email, password);
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        }
+        // Redirect to home page
+        window.location.href = '/home';
       } else {
         setError("Please use Clerk authentication when HTTP client is enabled. Switch to Mock Client to use demo accounts.");
       }

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { isUsingMockClient } from "@/api/clientSelector";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Users, Calendar, UserPlus, Mail, X } from "lucide-react";
+import { Plus, Search, Users, Calendar, UserPlus, Mail, X, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,12 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import TeamMemberCard from "@/components/people/TeamMemberCard";
 import LeaveRequestCard from "@/components/people/LeaveRequestCard";
 import LeaveRequestForm from "@/components/people/LeaveRequestForm";
+import BulkInviteDialog from "@/components/people/BulkInviteDialog";
+import TeamGrowthAnalytics from "@/components/people/TeamGrowthAnalytics";
 import EmptyState from "@/components/common/EmptyState";
 
 export default function People() {
@@ -36,6 +44,7 @@ export default function People() {
   const [activeTab, setActiveTab] = useState("directory");
   const [leaveFilter, setLeaveFilter] = useState("all");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showBulkInviteDialog, setShowBulkInviteDialog] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
   const [inviteError, setInviteError] = useState("");
@@ -281,6 +290,11 @@ export default function People() {
                 )}
               </TabsTrigger>
             )}
+            {!usingMock && isAdmin && (
+              <TabsTrigger value="analytics" className="gap-2">
+                📊 Analytics
+              </TabsTrigger>
+            )}
             <TabsTrigger value="leave" className="gap-2">
               <Calendar className="w-4 h-4" />
               Leave Requests
@@ -338,10 +352,25 @@ export default function People() {
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Manage member roles and invitations</p>
               </div>
               {isAdmin && (
-                <Button onClick={() => setShowInviteDialog(true)} className="gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Invite Member
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="gap-2">
+                      <UserPlus className="w-4 h-4" />
+                      Invite Members
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowInviteDialog(true)}>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Invite Single Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowBulkInviteDialog(true)}>
+                      <Users2 className="w-4 h-4 mr-2" />
+                      Bulk Invite Members
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
 
@@ -462,6 +491,14 @@ export default function People() {
           </>
         )}
 
+        {activeTab === "analytics" && !usingMock && isAdmin && (
+          <TeamGrowthAnalytics
+            members={members}
+            invitations={invitations}
+            users={users}
+          />
+        )}
+
         {activeTab === "leave" && (
           <>
             {/* Leave Filters */}
@@ -519,6 +556,13 @@ export default function People() {
         open={showLeaveForm}
         onClose={() => setShowLeaveForm(false)}
         onSubmit={handleCreateLeave}
+      />
+
+      {/* Bulk Invite Dialog */}
+      <BulkInviteDialog
+        open={showBulkInviteDialog}
+        onClose={() => setShowBulkInviteDialog(false)}
+        onInvite={() => refetchInvitations()}
       />
 
       {/* Invite Member Dialog */}
