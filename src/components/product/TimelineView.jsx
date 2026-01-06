@@ -33,12 +33,14 @@ export default function TimelineView({ decisions = [], tasks = [], milestones = 
     ...decisions.map(d => ({
       ...d,
       type: 'decision',
-      eventDate: parseDate(d.created_date),
+      // Handle both created_at (database) and created_date (demo mode)
+      eventDate: parseDate(d.created_at || d.created_date),
     })),
     ...tasks.map(t => ({
       ...t,
       type: 'task',
-      eventDate: parseDate(t.created_date),
+      // Handle both created_at (database) and created_date (demo mode)
+      eventDate: parseDate(t.created_at || t.created_date),
     })),
     ...milestones.map(m => ({
       ...m,

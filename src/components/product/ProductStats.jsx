@@ -12,8 +12,11 @@ export default function ProductStats({ decisions, tasks }) {
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const recentlyCompleted = tasks.filter(t => {
     if (t.status !== 'done') return false;
-    const createdDate = new Date(t.created_date);
-    return createdDate >= oneWeekAgo;
+    // Handle both created_at (database) and created_date (demo mode)
+    const dateValue = t.created_at || t.created_date;
+    if (!dateValue) return false;
+    const createdDate = new Date(dateValue);
+    return !isNaN(createdDate.getTime()) && createdDate >= oneWeekAgo;
   }).length;
 
   return (

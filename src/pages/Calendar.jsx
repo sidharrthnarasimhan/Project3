@@ -26,7 +26,7 @@ export default function CalendarPage() {
 
   const { data: leaveRequests = [] } = useQuery({
     queryKey: ["leaveRequests"],
-    queryFn: () => base44.entities.LeaveRequest.list("-created_date"),
+    queryFn: () => base44.entities.LeaveRequest.list("-created_at"),
   });
 
   const { data: users = [] } = useQuery({

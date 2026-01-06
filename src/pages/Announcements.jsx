@@ -22,7 +22,7 @@ export default function Announcements() {
 
   const { data: announcements = [], isLoading } = useQuery({
     queryKey: ["announcements"],
-    queryFn: () => base44.entities.Announcement.list("-created_date"),
+    queryFn: () => base44.entities.Announcement.list("-created_at"),
   });
 
   const filteredAnnouncements = announcements.filter(a => {
@@ -38,7 +38,10 @@ export default function Announcements() {
   const sortedAnnouncements = [...filteredAnnouncements].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
-    return new Date(b.created_date) - new Date(a.created_date);
+    // Handle both created_at (database) and created_date (demo mode)
+    const dateA = new Date(a.created_at || a.created_date);
+    const dateB = new Date(b.created_at || b.created_date);
+    return dateB - dateA;
   });
 
   const handleCreate = async (data) => {

@@ -5,6 +5,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
 import { getData } from "@/api/mockData";
+import { isUsingMockClient } from "@/api/clientSelector";
 import {
   LayoutDashboard,
   Vote,
@@ -60,12 +61,34 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
 
-    // Load company settings from localStorage
-    const loadCompanySettings = () => {
+    // Load company settings
+    const loadCompanySettings = async () => {
       try {
-        const data = getData();
-        if (data.companySettings) {
-          setCompanySettings(data.companySettings);
+        const usingMock = isUsingMockClient();
+
+        if (usingMock) {
+          // Demo mode - load from localStorage
+          const data = getData();
+          if (data.companySettings) {
+            setCompanySettings(data.companySettings);
+          }
+        } else {
+          // HTTP mode - load from backend
+          const orgId = localStorage.getItem('current_org_id');
+          if (orgId && window.Clerk && window.Clerk.session) {
+            const token = await window.Clerk.session.getToken();
+            const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              setCompanySettings({
+                name: data.data.name || 'Startup OS',
+                logo: data.data.logo,
+              });
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to load company settings:', error);

@@ -17,7 +17,7 @@ export default function Billing() {
 
   const { data: tools = [], isLoading } = useQuery({
     queryKey: ["billingTools"],
-    queryFn: () => base44.entities.BillingTool.list("-created_date"),
+    queryFn: () => base44.entities.BillingTool.list("-created_at"),
   });
 
   const handleAdd = () => {

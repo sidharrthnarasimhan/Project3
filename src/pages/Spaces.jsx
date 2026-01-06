@@ -28,7 +28,7 @@ export default function Spaces() {
 
   const { data: spaces = [], isLoading, refetch } = useQuery({
     queryKey: ["spaces"],
-    queryFn: () => base44.entities.Space.list("-updated_date"),
+    queryFn: () => base44.entities.Space.list("-updated_at"),
   });
 
   const { data: users = [] } = useQuery({
@@ -55,7 +55,6 @@ export default function Spaces() {
         ...newSpace,
         owner: currentUser.email,
         owner_name: currentUser.full_name,
-        updated_date: new Date().toISOString(),
       });
       setIsCreateDialogOpen(false);
       setNewSpace({
@@ -89,7 +88,6 @@ export default function Spaces() {
       await base44.entities.Space.update(selectedSpace.id, {
         allowed_users: selectedSpace.allowed_users,
         is_public: selectedSpace.is_public,
-        updated_date: new Date().toISOString(),
       });
       setIsAccessDialogOpen(false);
       setSelectedSpace(null);
@@ -191,7 +189,7 @@ export default function Spaces() {
                   <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-500 mb-4">
                     <span>By {space.owner_name}</span>
                     <span>•</span>
-                    <span>Updated {format(new Date(space.updated_date), 'MMM d')}</span>
+                    <span>Updated {format(new Date(space.updated_at || space.updated_date), 'MMM d')}</span>
                   </div>
 
                   {/* Actions */}

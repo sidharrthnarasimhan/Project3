@@ -70,6 +70,10 @@ function PagesContent() {
     const currentPage = _getCurrentPage(location.pathname);
     const [currentUser, setCurrentUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [userOrgs, setUserOrgs] = useState(null);
+    const [checkingOrgs, setCheckingOrgs] = useState(false);
+    // Initialize currentOrgId from localStorage immediately
+    const [currentOrgId, setCurrentOrgId] = useState(() => localStorage.getItem('current_org_id'));
 
     // Get Clerk user if using HTTP client
     const { isLoaded: clerkLoaded, isSignedIn, user: clerkUser } = useUser();
@@ -109,6 +113,59 @@ function PagesContent() {
         }
     }, [clerkLoaded, isSignedIn, clerkUser, usingMock]);
 
+    // Check user's organizations (only for HTTP client mode)
+    useEffect(() => {
+        async function checkOrganizations() {
+            if (!usingMock && currentUser && window.Clerk) {
+                setCheckingOrgs(true);
+                try {
+                    const token = await window.Clerk.session.getToken();
+                    const response = await fetch('http://localhost:3001/api/users/orgs', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const orgs = data.data || [];
+                        setUserOrgs(orgs);
+
+                        // If user has orgs, set the first one as current (or keep existing if valid)
+                        if (orgs.length > 0) {
+                            const storedOrgId = localStorage.getItem('current_org_id');
+                            const currentOrgStillValid = orgs.find(o => o.id === storedOrgId);
+
+                            if (currentOrgStillValid) {
+                                // Keep existing valid org
+                                setCurrentOrgId(storedOrgId);
+                            } else {
+                                // Set to first org if current is invalid
+                                const newOrgId = orgs[0].id;
+                                localStorage.setItem('current_org_id', newOrgId);
+                                setCurrentOrgId(newOrgId);
+                            }
+                        } else {
+                            // No orgs - clear localStorage
+                            localStorage.removeItem('current_org_id');
+                            setCurrentOrgId(null);
+                        }
+                    } else {
+                        setUserOrgs([]);
+                    }
+                } catch (err) {
+                    console.error('Failed to check organizations:', err);
+                    setUserOrgs([]);
+                } finally {
+                    setCheckingOrgs(false);
+                }
+            }
+        }
+
+        // Only run once when currentUser is available
+        if (currentUser && !usingMock && userOrgs === null) {
+            checkOrganizations();
+        }
+    }, [currentUser, usingMock]);
+
     const handleLoginSuccess = () => {
         // Reload to get current user
         window.location.reload();
@@ -136,11 +193,39 @@ function PagesContent() {
         return <Login onLoginSuccess={handleLoginSuccess} />;
     }
 
-    // Check if user has an organization (only for HTTP client mode)
+    // For HTTP client mode: check organizations before rendering any pages
     if (!usingMock && currentUser) {
-        const currentOrgId = localStorage.getItem('current_org_id');
-        if (!currentOrgId) {
-            return <CreateOrganization onSuccess={handleOrganizationCreated} />;
+        // Still checking organizations
+        if (userOrgs === null || checkingOrgs) {
+            return (
+                <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-zinc-600 dark:text-zinc-400">Loading organizations...</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // No organizations - show create org screen
+        if (userOrgs.length === 0) {
+            return <CreateOrganization onSuccess={handleOrganizationCreated} currentUser={currentUser} />;
+        }
+
+        // Has orgs but org ID not set yet (should rarely happen with localStorage init)
+        if (!currentOrgId && userOrgs.length > 0) {
+            // Set to first org
+            const newOrgId = userOrgs[0].id;
+            localStorage.setItem('current_org_id', newOrgId);
+            setCurrentOrgId(newOrgId);
+            return (
+                <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-zinc-600 dark:text-zinc-400">Setting up organization...</p>
+                    </div>
+                </div>
+            );
         }
     }
 

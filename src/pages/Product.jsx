@@ -14,12 +14,12 @@ export default function Product() {
 
   const { data: decisions = [], isLoading: loadingDecisions } = useQuery({
     queryKey: ["decisions"],
-    queryFn: () => base44.entities.Decision.list("-created_date"),
+    queryFn: () => base44.entities.Decision.list("-created_at"),
   });
 
   const { data: tasks = [], isLoading: loadingTasks } = useQuery({
     queryKey: ["tasks"],
-    queryFn: () => base44.entities.Task.list("-created_date"),
+    queryFn: () => base44.entities.Task.list("-created_at"),
   });
 
   const { data: milestones = [], isLoading: loadingMilestones } = useQuery({

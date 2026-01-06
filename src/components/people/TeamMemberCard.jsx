@@ -5,6 +5,19 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 
 export default function TeamMemberCard({ user, onClick }) {
+  // Format join date safely - handle both created_date and created_at from different sources
+  const formatJoinDate = () => {
+    try {
+      const dateValue = user.created_at || user.created_date;
+      if (!dateValue) return 'recently';
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return 'recently';
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return 'recently';
+    }
+  };
+
   return (
     <div
       onClick={onClick}
@@ -31,7 +44,7 @@ export default function TeamMemberCard({ user, onClick }) {
           <div className="flex items-center gap-4 mt-2 text-xs text-zinc-400 dark:text-zinc-500">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
-              Joined {formatDistanceToNow(new Date(user.created_date), { addSuffix: true })}
+              Joined {formatJoinDate()}
             </span>
           </div>
         </div>

@@ -127,28 +127,49 @@ export default function HealthStatus() {
           };
 
         case "api-tasks":
-          await base44.entities.Task.list();
-          const taskResponseTime = Math.round(performance.now() - startTime);
-          return {
-            status: taskResponseTime < 100 ? "healthy" : taskResponseTime < 300 ? "degraded" : "down",
-            responseTime: taskResponseTime
-          };
+          try {
+            await base44.entities.Task.list();
+            const taskResponseTime = Math.round(performance.now() - startTime);
+            return {
+              status: taskResponseTime < 1000 ? "healthy" : taskResponseTime < 3000 ? "degraded" : "down",
+              responseTime: taskResponseTime
+            };
+          } catch (error) {
+            return {
+              status: "down",
+              responseTime: null
+            };
+          }
 
         case "api-decisions":
-          await base44.entities.Decision.list();
-          const decisionResponseTime = Math.round(performance.now() - startTime);
-          return {
-            status: decisionResponseTime < 100 ? "healthy" : decisionResponseTime < 300 ? "degraded" : "down",
-            responseTime: decisionResponseTime
-          };
+          try {
+            await base44.entities.Decision.list();
+            const decisionResponseTime = Math.round(performance.now() - startTime);
+            return {
+              status: decisionResponseTime < 1000 ? "healthy" : decisionResponseTime < 3000 ? "degraded" : "down",
+              responseTime: decisionResponseTime
+            };
+          } catch (error) {
+            return {
+              status: "down",
+              responseTime: null
+            };
+          }
 
         case "api-users":
-          await base44.entities.User.list();
-          const userResponseTime = Math.round(performance.now() - startTime);
-          return {
-            status: userResponseTime < 100 ? "healthy" : userResponseTime < 300 ? "degraded" : "down",
-            responseTime: userResponseTime
-          };
+          try {
+            await base44.entities.User.list();
+            const userResponseTime = Math.round(performance.now() - startTime);
+            return {
+              status: userResponseTime < 1000 ? "healthy" : userResponseTime < 3000 ? "degraded" : "down",
+              responseTime: userResponseTime
+            };
+          } catch (error) {
+            return {
+              status: "down",
+              responseTime: null
+            };
+          }
 
         case "database":
           // Check localStorage availability

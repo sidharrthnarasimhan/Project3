@@ -17,8 +17,21 @@ const categoryIcons = {
 };
 
 export default function DecisionCard({ decision, commentCount = 0 }) {
+  // Format date safely - handle both created_date and created_at from different sources
+  const formatDate = () => {
+    try {
+      const dateValue = decision.created_at || decision.created_date;
+      if (!dateValue) return 'recently';
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return 'recently';
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return 'recently';
+    }
+  };
+
   return (
-    <Link 
+    <Link
       to={createPageUrl("DecisionDetail") + `?id=${decision.id}`}
       className="block group"
     >
@@ -53,7 +66,7 @@ export default function DecisionCard({ decision, commentCount = 0 }) {
                 </span>
               )}
               <span>
-                {formatDistanceToNow(new Date(decision.created_date), { addSuffix: true })}
+                {formatDate()}
               </span>
             </div>
           </div>

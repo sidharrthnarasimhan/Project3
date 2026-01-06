@@ -15,7 +15,7 @@ const typeConfig = {
 export default function AnnouncementCard({ announcement, onReact, currentUser }) {
   const config = typeConfig[announcement.type] || typeConfig.company;
   const reactions = announcement.reactions || [];
-  
+
   const reactionCounts = reactions.reduce((acc, r) => {
     acc[r.emoji] = (acc[r.emoji] || 0) + 1;
     return acc;
@@ -25,6 +25,19 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
 
   const emojis = ["👍", "❤️", "🎉", "👀", "🚀"];
 
+  // Format date safely - handle both created_date and created_at from different sources
+  const formatDate = () => {
+    try {
+      const dateValue = announcement.created_at || announcement.created_date;
+      if (!dateValue) return 'recently';
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return 'recently';
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return 'recently';
+    }
+  };
+
   return (
     <div className={cn(
       "rounded-xl bg-white dark:bg-zinc-800 border p-5 transition-all duration-200",
@@ -32,7 +45,7 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
     )}>
       <div className="flex items-start gap-4">
         <Avatar name={announcement.author_name} email={announcement.author} size="md" />
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3 mb-2">
             <div>
@@ -45,7 +58,7 @@ export default function AnnouncementCard({ announcement, onReact, currentUser })
                 </span>
               </div>
               <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                {formatDistanceToNow(new Date(announcement.created_date), { addSuffix: true })}
+                {formatDate()}
               </span>
             </div>
             {announcement.pinned && (

@@ -81,8 +81,8 @@ export default function Login({ onLoginSuccess }) {
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }}></div>
       <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-6s' }}></div>
 
-      {/* Client Switcher - visible on login page */}
-      <ClientSwitcher />
+      {/* Client Switcher - only show in demo mode */}
+      {isUsingMockClient() && <ClientSwitcher />}
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Header */}

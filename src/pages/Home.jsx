@@ -40,17 +40,17 @@ export default function Home() {
 
   const { data: decisions = [] } = useQuery({
     queryKey: ["decisions"],
-    queryFn: () => base44.entities.Decision.list("-created_date", 10),
+    queryFn: () => base44.entities.Decision.list("-created_at", 10),
   });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ["tasks"],
-    queryFn: () => base44.entities.Task.list("-created_date", 10),
+    queryFn: () => base44.entities.Task.list("-created_at", 10),
   });
 
   const { data: announcements = [] } = useQuery({
     queryKey: ["announcements"],
-    queryFn: () => base44.entities.Announcement.list("-created_date", 5),
+    queryFn: () => base44.entities.Announcement.list("-created_at", 5),
   });
 
   const { data: users = [] } = useQuery({
@@ -60,7 +60,7 @@ export default function Home() {
 
   const { data: comments = [] } = useQuery({
     queryKey: ["comments"],
-    queryFn: () => base44.entities.Comment.list("-created_date", 20),
+    queryFn: () => base44.entities.Comment.list("-created_at", 20),
   });
 
   const pendingDecisions = decisions.filter(d => d.status === "discussion" || d.status === "voting");

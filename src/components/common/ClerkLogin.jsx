@@ -27,12 +27,9 @@ export default function ClerkLogin() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 mb-6 shadow-2xl shadow-purple-500/50 animate-glow">
             <Zap className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Startup OS
           </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            ✨ Sign in to your workspace
-          </p>
         </div>
 
         {/* Clerk SignIn Component */}

@@ -218,7 +218,7 @@ export default async function organizationRoutes(fastify, options) {
     // Get members
     const membersQuery = await db.query(
       `SELECT
-         u.id,
+         u.id as user_id,
          u.email,
          u.full_name,
          u.avatar_url,
@@ -276,5 +276,267 @@ export default async function organizationRoutes(fastify, options) {
     }
 
     return successResponse(result.rows[0], 'Member role updated successfully');
+  });
+
+  /**
+   * PATCH /orgs/:orgId/members/:userId - Update member role (alternative route)
+   */
+  fastify.patch('/orgs/:orgId/members/:userId', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId, userId } = request.params;
+    const { role } = request.body;
+    const { clerkUserId } = request;
+
+    const validRoles = ['admin', 'manager', 'member', 'guest'];
+    if (!validRoles.includes(role)) {
+      throw new BadRequestError('Invalid role');
+    }
+
+    // Verify requester is admin or manager
+    const requesterQuery = await db.query(
+      `SELECT m.role
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (requesterQuery.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    const requesterRole = requesterQuery.rows[0].role;
+    if (requesterRole !== 'admin' && requesterRole !== 'manager') {
+      throw new BadRequestError('Only admins and managers can change member roles');
+    }
+
+    // Update role
+    const result = await db.query(
+      `UPDATE memberships
+       SET role = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE organization_id = $2 AND user_id = $3
+       RETURNING *`,
+      [role, orgId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Member not found');
+    }
+
+    return successResponse(result.rows[0], 'Member role updated successfully');
+  });
+
+  /**
+   * DELETE /orgs/:orgId/members/:userId - Remove member from organization
+   */
+  fastify.delete('/orgs/:orgId/members/:userId', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId, userId } = request.params;
+    const { clerkUserId } = request;
+
+    // Verify requester is admin
+    const requesterQuery = await db.query(
+      `SELECT m.role, u.id as requester_user_id
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (requesterQuery.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    if (requesterQuery.rows[0].role !== 'admin') {
+      throw new BadRequestError('Only admins can remove members');
+    }
+
+    // Prevent admin from removing themselves
+    if (requesterQuery.rows[0].requester_user_id === userId) {
+      throw new BadRequestError('You cannot remove yourself from the organization');
+    }
+
+    // Delete membership
+    const result = await db.query(
+      `DELETE FROM memberships
+       WHERE organization_id = $1 AND user_id = $2
+       RETURNING *`,
+      [orgId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Member not found');
+    }
+
+    return successResponse(null, 'Member removed successfully');
+  });
+
+  /**
+   * GET /orgs/:orgId/page-permissions - Get page permissions for organization
+   */
+  fastify.get('/orgs/:orgId/page-permissions', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId } = request.params;
+    const { clerkUserId } = request;
+
+    // Verify user has access to this org
+    const accessCheck = await db.query(
+      `SELECT 1
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (accessCheck.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    // Get page permissions
+    const permissionsQuery = await db.query(
+      `SELECT page_name, allowed_roles
+       FROM page_permissions
+       WHERE organization_id = $1`,
+      [orgId]
+    );
+
+    // Convert to object format { pageName: ['role1', 'role2'] }
+    const permissions = {};
+    permissionsQuery.rows.forEach(row => {
+      permissions[row.page_name] = row.allowed_roles;
+    });
+
+    return successResponse(permissions);
+  });
+
+  /**
+   * PUT /orgs/:orgId/page-permissions/:pageName - Update page permissions
+   */
+  fastify.put('/orgs/:orgId/page-permissions/:pageName', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId, pageName } = request.params;
+    const { allowed_roles } = request.body;
+    const { clerkUserId } = request;
+
+    // Verify user is admin
+    const membershipQuery = await db.query(
+      `SELECT m.role
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (membershipQuery.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    if (membershipQuery.rows[0].role !== 'admin') {
+      throw new BadRequestError('Only admins can update page permissions');
+    }
+
+    // Update or insert page permissions
+    const result = await db.query(
+      `INSERT INTO page_permissions (organization_id, page_name, allowed_roles)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (organization_id, page_name)
+       DO UPDATE SET allowed_roles = $3, updated_at = CURRENT_TIMESTAMP
+       RETURNING *`,
+      [orgId, pageName, allowed_roles]
+    );
+
+    return successResponse(result.rows[0], 'Page permissions updated successfully');
+  });
+
+  /**
+   * GET /orgs/:orgId/settings - Get company settings
+   */
+  fastify.get('/orgs/:orgId/settings', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId } = request.params;
+    const { clerkUserId } = request;
+
+    // Verify user has access to this org
+    const accessCheck = await db.query(
+      `SELECT 1
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (accessCheck.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    // Get company settings
+    const settingsQuery = await db.query(
+      `SELECT company_name, logo_url
+       FROM company_settings
+       WHERE organization_id = $1`,
+      [orgId]
+    );
+
+    if (settingsQuery.rows.length === 0) {
+      throw new NotFoundError('Company settings not found');
+    }
+
+    return successResponse({
+      name: settingsQuery.rows[0].company_name,
+      logo: settingsQuery.rows[0].logo_url,
+    });
+  });
+
+  /**
+   * PUT /orgs/:orgId/settings - Update company settings
+   */
+  fastify.put('/orgs/:orgId/settings', {
+    preHandler: authenticate,
+  }, async (request, reply) => {
+    const { orgId } = request.params;
+    const { name, logo } = request.body;
+    const { clerkUserId } = request;
+
+    // Verify user is admin
+    const membershipQuery = await db.query(
+      `SELECT m.role
+       FROM memberships m
+       JOIN users u ON m.user_id = u.id
+       WHERE m.organization_id = $1 AND u.clerk_user_id = $2`,
+      [orgId, clerkUserId]
+    );
+
+    if (membershipQuery.rows.length === 0) {
+      throw new NotFoundError('Organization not found or access denied');
+    }
+
+    if (membershipQuery.rows[0].role !== 'admin') {
+      throw new BadRequestError('Only admins can update company settings');
+    }
+
+    // Update company settings
+    const result = await db.query(
+      `UPDATE company_settings
+       SET company_name = COALESCE($1, company_name),
+           logo_url = COALESCE($2, logo_url),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE organization_id = $3
+       RETURNING *`,
+      [name, logo, orgId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError('Company settings not found');
+    }
+
+    return successResponse({
+      name: result.rows[0].company_name,
+      logo: result.rows[0].logo_url,
+    }, 'Company settings updated successfully');
   });
 }

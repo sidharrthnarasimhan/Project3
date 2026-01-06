@@ -8,6 +8,52 @@ import { successResponse, errorResponse } from '../utils/responses.js';
 
 export async function userRoutes(fastify, options) {
   /**
+   * GET /api/users
+   * Get all users in the current organization
+   */
+  fastify.get('/users', { preHandler: authenticate }, async (request, reply) => {
+    const clerkUserId = request.clerkUserId;
+    const db = fastify.db;
+    const { sortBy = '-created_at' } = request.query;
+
+    try {
+      // Get current user's organization
+      const userResult = await db.query(
+        `SELECT m.organization_id
+         FROM users u
+         JOIN memberships m ON u.id = m.user_id
+         WHERE u.clerk_user_id = $1
+         LIMIT 1`,
+        [clerkUserId]
+      );
+
+      if (userResult.rows.length === 0) {
+        return reply.code(404).send(errorResponse('User not found', 'NOT_FOUND'));
+      }
+
+      const orgId = userResult.rows[0].organization_id;
+
+      // Get all users in the same organization
+      const sortField = sortBy.startsWith('-') ? sortBy.slice(1) : sortBy;
+      const sortOrder = sortBy.startsWith('-') ? 'DESC' : 'ASC';
+
+      const result = await db.query(
+        `SELECT DISTINCT u.id, u.clerk_user_id, u.email, u.full_name, u.avatar_url, u.created_at, u.updated_at, m.role
+         FROM users u
+         JOIN memberships m ON u.id = m.user_id
+         WHERE m.organization_id = $1
+         ORDER BY ${sortField} ${sortOrder}`,
+        [orgId]
+      );
+
+      return reply.send(successResponse(result.rows));
+    } catch (error) {
+      fastify.log.error({ err: error }, 'Failed to get users');
+      return reply.code(500).send(errorResponse('Failed to get users'));
+    }
+  });
+
+  /**
    * POST /api/users/sync
    * Register or update user from Clerk
    */
@@ -90,6 +136,44 @@ export async function userRoutes(fastify, options) {
     } catch (error) {
       fastify.log.error({ err: error }, 'Failed to get user');
       return reply.code(500).send(errorResponse('Failed to get user'));
+    }
+  });
+
+  /**
+   * GET /api/users/orgs
+   * Get all organizations the current user belongs to
+   */
+  fastify.get('/users/orgs', { preHandler: authenticate }, async (request, reply) => {
+    const clerkUserId = request.clerkUserId;
+    const db = fastify.db;
+
+    try {
+      // First get the user's internal ID
+      const userResult = await db.query(
+        'SELECT id FROM users WHERE clerk_user_id = $1',
+        [clerkUserId]
+      );
+
+      if (userResult.rows.length === 0) {
+        return reply.code(404).send(errorResponse('User not found', 'NOT_FOUND'));
+      }
+
+      const userId = userResult.rows[0].id;
+
+      // Get all organizations this user is a member of
+      const result = await db.query(
+        `SELECT o.*, m.role, m.created_at as joined_at
+         FROM organizations o
+         INNER JOIN memberships m ON o.id = m.organization_id
+         WHERE m.user_id = $1
+         ORDER BY m.created_at DESC`,
+        [userId]
+      );
+
+      return reply.send(successResponse(result.rows));
+    } catch (error) {
+      fastify.log.error({ err: error }, 'Failed to get user organizations');
+      return reply.code(500).send(errorResponse('Failed to get user organizations'));
     }
   });
 }

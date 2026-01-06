@@ -84,8 +84,21 @@ class HttpEntity {
     return `/${this.entityName}`;
   }
 
-  async list(sortBy = '-created_at') {
-    const params = new URLSearchParams({ sortBy });
+  async list(sortBy = '-created_at', limit) {
+    // Map created_date/updated_date to created_at/updated_at for backend compatibility
+    const mappedSortBy = sortBy.replace('created_date', 'created_at').replace('updated_date', 'updated_at');
+    const params = new URLSearchParams({ sortBy: mappedSortBy });
+    if (limit) params.append('limit', limit);
+    return request(`${this.getBasePath()}?${params}`);
+  }
+
+  async filter(filters, sortBy = '-created_at') {
+    // Map created_date/updated_date to created_at/updated_at for backend compatibility
+    const mappedSortBy = sortBy.replace('created_date', 'created_at').replace('updated_date', 'updated_at');
+    const params = new URLSearchParams({ sortBy: mappedSortBy });
+    Object.entries(filters).forEach(([key, value]) => {
+      params.append(key, value);
+    });
     return request(`${this.getBasePath()}?${params}`);
   }
 

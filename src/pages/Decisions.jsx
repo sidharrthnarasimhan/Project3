@@ -23,7 +23,7 @@ export default function Decisions() {
 
   const { data: decisions = [], isLoading } = useQuery({
     queryKey: ["decisions"],
-    queryFn: () => base44.entities.Decision.list("-created_date"),
+    queryFn: () => base44.entities.Decision.list("-created_at"),
   });
 
   const { data: comments = [] } = useQuery({

@@ -4,6 +4,7 @@ import 'dotenv/config';
 import db from './db/index.js';
 import { userRoutes } from './routes/users.js';
 import organizationRoutes from './routes/organizations.js';
+import { invitationRoutes } from './routes/invitations.js';
 import decisionRoutes from './routes/decisions.js';
 import taskRoutes from './routes/tasks.js';
 import spaceRoutes from './routes/spaces.js';
@@ -63,6 +64,7 @@ fastify.get('/', async (request, reply) => {
 // Register routes
 fastify.register(userRoutes, { prefix: '/api' });
 fastify.register(organizationRoutes, { prefix: '/api' });
+fastify.register(invitationRoutes, { prefix: '/api' });
 fastify.register(decisionRoutes, { prefix: '/api' });
 fastify.register(taskRoutes, { prefix: '/api' });
 fastify.register(spaceRoutes, { prefix: '/api' });

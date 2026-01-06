@@ -15,17 +15,17 @@ export default function GlobalSearch() {
   // Fetch all data
   const { data: tasks = [] } = useQuery({
     queryKey: ["tasks"],
-    queryFn: () => base44.entities.Task.list("-created_date"),
+    queryFn: () => base44.entities.Task.list("-created_at"),
   });
 
   const { data: decisions = [] } = useQuery({
     queryKey: ["decisions"],
-    queryFn: () => base44.entities.Decision.list("-created_date"),
+    queryFn: () => base44.entities.Decision.list("-created_at"),
   });
 
   const { data: announcements = [] } = useQuery({
     queryKey: ["announcements"],
-    queryFn: () => base44.entities.Announcement.list("-created_date"),
+    queryFn: () => base44.entities.Announcement.list("-created_at"),
   });
 
   const { data: users = [] } = useQuery({

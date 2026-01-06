@@ -41,7 +41,7 @@ export default function Tasks() {
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["tasks"],
-    queryFn: () => base44.entities.Task.list("-created_date"),
+    queryFn: () => base44.entities.Task.list("-created_at"),
   });
 
   const { data: users = [] } = useQuery({
@@ -75,7 +75,10 @@ export default function Tasks() {
         return new Date(a.due_date) - new Date(b.due_date);
       case "created":
       default:
-        return new Date(b.created_date) - new Date(a.created_date);
+        // Handle both created_at (database) and created_date (demo mode)
+        const dateA = new Date(a.created_at || a.created_date);
+        const dateB = new Date(b.created_at || b.created_date);
+        return dateB - dateA;
     }
   });
 

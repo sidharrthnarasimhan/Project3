@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import { getData, setData } from "@/api/mockData";
+import { isUsingMockClient } from "@/api/clientSelector";
 import {
   Settings as SettingsIcon,
   Mail,
@@ -73,23 +74,57 @@ export default function Settings() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
 
     // Load page permissions
-    const permissions = base44.auth.getPagePermissions();
-    setPagePermissions(permissions);
+    const loadPagePermissions = async () => {
+      try {
+        const permissions = await base44.auth.getPagePermissions();
+        setPagePermissions(permissions);
+      } catch (err) {
+        console.error('Failed to load page permissions:', err);
+      }
+    };
+    loadPagePermissions();
 
     // Load company settings
-    const user = base44.auth.getCurrentUser();
-    if (user) {
-      const allData = getData();
-      if (allData.companySettings) {
-        setCompanyName(allData.companySettings.name || 'Startup OS');
-        setCompanyLogo(allData.companySettings.logo);
+    const loadCompanySettings = async () => {
+      const usingMock = isUsingMockClient();
+
+      if (usingMock) {
+        // Demo mode - load from localStorage
+        const user = base44.auth.getCurrentUser();
+        if (user) {
+          const allData = getData();
+          if (allData.companySettings) {
+            setCompanyName(allData.companySettings.name || 'Startup OS');
+            setCompanyLogo(allData.companySettings.logo);
+          }
+        }
+      } else {
+        // HTTP mode - load from backend
+        try {
+          const orgId = localStorage.getItem('current_org_id');
+          if (orgId) {
+            const token = await window.Clerk.session.getToken();
+            const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              setCompanyName(data.data.name || 'Startup OS');
+              setCompanyLogo(data.data.logo);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to load company settings:', err);
+        }
       }
-    }
+    };
+    loadCompanySettings();
   }, []);
 
   const { data: leaveRequests = [] } = useQuery({
     queryKey: ["leaveRequests"],
-    queryFn: () => base44.entities.LeaveRequest.list("-created_date"),
+    queryFn: () => base44.entities.LeaveRequest.list("-created_at"),
     enabled: !!currentUser?.role && currentUser.role === 'admin',
   });
 
@@ -101,7 +136,7 @@ export default function Settings() {
 
   const { data: timeEntries = [] } = useQuery({
     queryKey: ["timeEntries"],
-    queryFn: () => base44.entities.TimeEntry.list("-created_date"),
+    queryFn: () => base44.entities.TimeEntry.list("-created_at"),
     enabled: !!currentUser?.role && currentUser.role === 'admin',
   });
 
@@ -156,21 +191,51 @@ export default function Settings() {
   const handleSaveCompany = async () => {
     setSaving(true);
 
-    // Save to localStorage
-    const data = getData();
-    data.companySettings = {
-      name: companyName,
-      logo: companyLogo,
-    };
-    setData(data);
+    try {
+      const usingMock = isUsingMockClient();
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setSaving(false);
+      if (usingMock) {
+        // Demo mode - save to localStorage
+        const data = getData();
+        data.companySettings = {
+          name: companyName,
+          logo: companyLogo,
+        };
+        setData(data);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        // HTTP mode - save to backend
+        const orgId = localStorage.getItem('current_org_id');
+        if (orgId) {
+          const token = await window.Clerk.session.getToken();
+          const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: companyName,
+              logo: companyLogo,
+            })
+          });
 
-    // Dispatch custom event to notify Layout component
-    window.dispatchEvent(new Event('companySettingsUpdated'));
+          if (!response.ok) {
+            throw new Error('Failed to save company settings');
+          }
+        }
+      }
 
-    toast.success("Company settings saved!");
+      // Dispatch custom event to notify Layout component
+      window.dispatchEvent(new Event('companySettingsUpdated'));
+
+      toast.success("Company settings saved!");
+    } catch (err) {
+      console.error('Failed to save company settings:', err);
+      toast.error("Failed to save company settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handlePermissionToggle = (pageName, role) => {

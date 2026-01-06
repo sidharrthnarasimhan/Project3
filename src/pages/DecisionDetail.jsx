@@ -66,7 +66,7 @@ export default function DecisionDetail() {
 
   const { data: comments = [] } = useQuery({
     queryKey: ["comments", decisionId],
-    queryFn: () => base44.entities.Comment.filter({ entity_id: decisionId }, "-created_date"),
+    queryFn: () => base44.entities.Comment.filter({ entity_id: decisionId }, "-created_at"),
     enabled: !!decisionId,
   });
 
@@ -210,7 +210,15 @@ export default function DecisionDetail() {
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                {formatDistanceToNow(new Date(decision.created_date), { addSuffix: true })}
+                {(() => {
+                  try {
+                    const dateValue = decision.created_at || decision.created_date;
+                    const date = new Date(dateValue);
+                    return isNaN(date.getTime()) ? 'recently' : formatDistanceToNow(date, { addSuffix: true });
+                  } catch {
+                    return 'recently';
+                  }
+                })()}
               </div>
             </div>
           </div>
@@ -333,7 +341,15 @@ export default function DecisionDetail() {
                         {comment.author_name || comment.author}
                       </span>
                       <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                        {formatDistanceToNow(new Date(comment.created_date), { addSuffix: true })}
+                        {(() => {
+                          try {
+                            const dateValue = comment.created_at || comment.created_date;
+                            const date = new Date(dateValue);
+                            return isNaN(date.getTime()) ? 'recently' : formatDistanceToNow(date, { addSuffix: true });
+                          } catch {
+                            return 'recently';
+                          }
+                        })()}
                       </span>
                     </div>
                     <p className="text-zinc-600 dark:text-zinc-300 text-sm whitespace-pre-wrap">{comment.content}</p>
