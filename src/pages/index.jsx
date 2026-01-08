@@ -377,7 +377,7 @@ function PagesContent() {
                 <Route path="/systemhealth" element={
                     <ProtectedRoute pageName="SystemHealth" currentUser={currentUser}>
                         <SystemHealth />
-                    </ProtectedRoute}
+                    </ProtectedRoute>
                 } />
 
                 {/* Space detail route - opens in new tab, no layout wrapper needed */}
