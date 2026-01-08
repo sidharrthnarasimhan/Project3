@@ -24,6 +24,7 @@ import {
   Rocket,
   BookOpen,
   Activity,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +49,7 @@ const navItems = [
   { name: "Announcements", path: "Announcements", icon: Megaphone },
   { name: "People", path: "People", icon: Users },
   { name: "Health", path: "Health", icon: Activity },
+  { name: "System Health", path: "SystemHealth", icon: Shield },
   { name: "Billing", path: "Billing", icon: DollarSign },
   { name: "Settings", path: "Settings", icon: Settings },
 ];
