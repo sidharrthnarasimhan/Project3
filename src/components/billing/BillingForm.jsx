@@ -56,13 +56,13 @@ export default function BillingForm({ open, onClose, onSubmit, initialData }) {
     }
   }, [initialData, open]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({
+    await onSubmit({
       ...formData,
       cost_per_month: parseFloat(formData.cost_per_month),
     });
-    onClose();
+    // Note: onClose is now called by parent after successful submission
   };
 
   const handleChange = (field, value) => {

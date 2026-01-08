@@ -38,12 +38,19 @@ export default function Billing() {
   };
 
   const handleSubmit = async (data) => {
-    if (editingTool) {
-      await base44.entities.BillingTool.update(editingTool.id, data);
-    } else {
-      await base44.entities.BillingTool.create(data);
+    try {
+      if (editingTool) {
+        await base44.entities.BillingTool.update(editingTool.id, data);
+      } else {
+        await base44.entities.BillingTool.create(data);
+      }
+      queryClient.invalidateQueries({ queryKey: ["billingTools"] });
+      setShowForm(false);
+      setEditingTool(null);
+    } catch (error) {
+      console.error('Error saving billing tool:', error);
+      alert('Failed to save billing tool: ' + error.message);
     }
-    queryClient.invalidateQueries({ queryKey: ["billingTools"] });
   };
 
   // Calculate statistics
