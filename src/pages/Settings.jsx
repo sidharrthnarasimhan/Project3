@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,7 +105,7 @@ export default function Settings() {
           const orgId = localStorage.getItem('current_org_id');
           if (orgId) {
             const token = await window.Clerk.session.getToken();
-            const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+            const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/settings`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -208,7 +209,7 @@ export default function Settings() {
         const orgId = localStorage.getItem('current_org_id');
         if (orgId) {
           const token = await window.Clerk.session.getToken();
-          const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+          const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/settings`, {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${token}`,

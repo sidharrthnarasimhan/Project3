@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
 import { getData } from "@/api/mockData";
 import { isUsingMockClient } from "@/api/clientSelector";
+import { API_BASE_URL } from "@/config";
 import {
   LayoutDashboard,
   Vote,
@@ -78,7 +79,7 @@ export default function Layout({ children, currentPageName }) {
           const orgId = localStorage.getItem('current_org_id');
           if (orgId && window.Clerk && window.Clerk.session) {
             const token = await window.Clerk.session.getToken();
-            const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/settings`, {
+            const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/settings`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
 

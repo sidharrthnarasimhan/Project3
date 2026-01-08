@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { base44 } from "@/api/base44Client";
 import { isUsingMockClient } from "@/api/clientSelector";
+import { API_BASE_URL } from "@/config";
 import Layout from "./Layout.jsx";
 import Login from "./Login";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
@@ -123,7 +124,7 @@ function PagesContent() {
                 setCheckingOrgs(true);
                 try {
                     const token = await window.Clerk.session.getToken();
-                    const response = await fetch('http://localhost:3001/api/users/orgs', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/orgs`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
 
@@ -151,7 +152,7 @@ function PagesContent() {
 
                             // Fetch user's role in the organization
                             try {
-                                const membersResponse = await fetch(`http://localhost:3001/api/orgs/${selectedOrgId}/members`, {
+                                const membersResponse = await fetch(`${API_BASE_URL}/api/orgs/${selectedOrgId}/members`, {
                                     headers: { 'Authorization': `Bearer ${token}` }
                                 });
                                 if (membersResponse.ok) {

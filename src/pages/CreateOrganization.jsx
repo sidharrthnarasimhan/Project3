@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,7 @@ export default function CreateOrganization({ onSuccess, currentUser }) {
   const fetchPendingInvitations = async () => {
     try {
       const token = await window.Clerk.session.getToken();
-      const response = await fetch('http://localhost:3001/api/invitations/pending', {
+      const response = await fetch(`${API_BASE_URL}/api/invitations/pending`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
@@ -46,7 +47,7 @@ export default function CreateOrganization({ onSuccess, currentUser }) {
 
     try {
       const token = await window.Clerk.session.getToken();
-      const response = await fetch(`http://localhost:3001/api/invitations/${invitationId}/accept`, {
+      const response = await fetch(`${API_BASE_URL}/api/invitations/${invitationId}/accept`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -100,7 +101,7 @@ export default function CreateOrganization({ onSuccess, currentUser }) {
 
       // Step 1: Register/sync user in backend
       try {
-        const userResponse = await fetch('http://localhost:3001/api/users/sync', {
+        const userResponse = await fetch(`${API_BASE_URL}/api/users/sync`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -125,7 +126,7 @@ export default function CreateOrganization({ onSuccess, currentUser }) {
       }
 
       // Step 2: Create organization
-      const response = await fetch('http://localhost:3001/api/orgs', {
+      const response = await fetch(`${API_BASE_URL}/api/orgs`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

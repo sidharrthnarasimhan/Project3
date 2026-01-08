@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE_URL } from "@/config";
 import { Upload, X, UserPlus, AlertCircle, CheckCircle2, Download } from "lucide-react";
 import {
   Dialog,
@@ -120,7 +121,7 @@ export default function BulkInviteDialog({ open, onClose, onInvite }) {
 
       for (const invitation of invitations) {
         try {
-          const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/invitations`, {
+          const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/invitations`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,

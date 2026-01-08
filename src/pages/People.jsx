@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { isUsingMockClient } from "@/api/clientSelector";
+import { API_BASE_URL } from "@/config";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Users, Calendar, UserPlus, Mail, X, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,7 @@ export default function People() {
       if (!usingMock && user && window.Clerk) {
         try {
           const token = await window.Clerk.session.getToken();
-          const response = await fetch('http://localhost:3001/api/users/me', {
+          const response = await fetch(`${API_BASE_URL}/api/users/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (response.ok) {
@@ -93,7 +94,7 @@ export default function People() {
       if (!orgId) return [];
 
       const token = await window.Clerk.session.getToken();
-      const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/members`, {
+      const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/members`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -112,7 +113,7 @@ export default function People() {
       if (!orgId) return [];
 
       const token = await window.Clerk.session.getToken();
-      const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/invitations`, {
+      const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/invitations`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -190,7 +191,7 @@ export default function People() {
       const orgId = localStorage.getItem('current_org_id');
       const token = await window.Clerk.session.getToken();
 
-      const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/invitations`, {
+      const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/invitations`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -222,7 +223,7 @@ export default function People() {
   const handleCancelInvitation = async (invitationId) => {
     try {
       const token = await window.Clerk.session.getToken();
-      const response = await fetch(`http://localhost:3001/api/invitations/${invitationId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/invitations/${invitationId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -239,7 +240,7 @@ export default function People() {
       const orgId = localStorage.getItem('current_org_id');
       const token = await window.Clerk.session.getToken();
 
-      const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/members/${memberId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/members/${memberId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -262,7 +263,7 @@ export default function People() {
       const orgId = localStorage.getItem('current_org_id');
       const token = await window.Clerk.session.getToken();
 
-      const response = await fetch(`http://localhost:3001/api/orgs/${orgId}/members/${memberId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/orgs/${orgId}/members/${memberId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
