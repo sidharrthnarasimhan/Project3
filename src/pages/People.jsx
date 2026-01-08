@@ -141,7 +141,14 @@ export default function People() {
     }
     // Find current user in members list to get their org-specific role
     const currentMember = members.find(m => m.email === currentUser?.email);
-    return currentMember?.role || currentUser?.role;
+    const role = currentMember?.role || currentUser?.role;
+
+    // Store role in localStorage for use by hasPageAccess
+    if (role && !usingMock) {
+      localStorage.setItem('current_user_role', role);
+    }
+
+    return role;
   };
 
   const isAdmin = getCurrentUserRole() === "admin";

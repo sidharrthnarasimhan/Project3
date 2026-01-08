@@ -157,8 +157,31 @@ const auth = {
   },
 
   hasPageAccess(pageName) {
-    // For now, allow all pages (will be controlled by backend)
-    return true;
+    // Basic page permissions (can be enhanced with backend API)
+    const pagePermissions = {
+      Home: ['admin', 'manager', 'member', 'guest'],
+      Decisions: ['admin', 'manager', 'member'],
+      Tasks: ['admin', 'manager', 'member'],
+      Announcements: ['admin', 'manager', 'member', 'guest'],
+      People: ['admin', 'manager'],
+      Calendar: ['admin', 'manager', 'member', 'guest'],
+      Settings: ['admin', 'manager', 'member', 'guest'],
+      Billing: ['admin'],
+      Product: ['admin', 'manager'],
+      Spaces: ['admin', 'manager', 'member', 'guest'],
+      Health: ['admin'],
+      SystemHealth: ['admin'],
+    };
+
+    // Get user's role from localStorage (set by People page or org fetch)
+    const userRole = localStorage.getItem('current_user_role');
+    if (!userRole) {
+      // If no role set, assume member (restrictive default)
+      return pagePermissions[pageName]?.includes('member') || false;
+    }
+
+    const allowedRoles = pagePermissions[pageName] || [];
+    return allowedRoles.includes(userRole);
   },
 
   async updatePagePermissions(pageName, allowedRoles) {
