@@ -59,6 +59,7 @@ const defaultData = {
     Product: ['admin', 'manager'],
     Spaces: ['admin', 'manager', 'member', 'guest'],
     Health: ['admin'],
+    SystemHealth: ['admin'],
   },
   holidays: [
     {

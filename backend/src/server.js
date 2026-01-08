@@ -17,6 +17,7 @@ import {
   billingToolRoutes,
   milestoneRoutes,
 } from './routes/all-entities.js';
+import healthRoutes from './routes/health.js';
 
 const fastify = Fastify({
   logger: {
@@ -62,6 +63,7 @@ fastify.get('/', async (request, reply) => {
 });
 
 // Register routes
+fastify.register(healthRoutes); // Health check routes (no prefix)
 fastify.register(userRoutes, { prefix: '/api' });
 fastify.register(organizationRoutes, { prefix: '/api' });
 fastify.register(invitationRoutes, { prefix: '/api' });

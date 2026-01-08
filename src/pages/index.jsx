@@ -19,6 +19,7 @@ import Product from "./Product";
 import Spaces from "./Spaces";
 import SpaceDetail from "./SpaceDetail";
 import Health from "./Health";
+import SystemHealth from "./SystemHealth";
 import CreateOrganization from "./CreateOrganization";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
@@ -48,6 +49,8 @@ const PAGES = {
     Spaces: Spaces,
 
     Health: Health,
+
+    SystemHealth: SystemHealth,
 
 }
 
@@ -364,6 +367,17 @@ function PagesContent() {
                     <ProtectedRoute pageName="Health" currentUser={currentUser}>
                         <Health />
                     </ProtectedRoute>
+                } />
+
+                <Route path="/SystemHealth" element={
+                    <ProtectedRoute pageName="SystemHealth" currentUser={currentUser}>
+                        <SystemHealth />
+                    </ProtectedRoute>
+                } />
+                <Route path="/systemhealth" element={
+                    <ProtectedRoute pageName="SystemHealth" currentUser={currentUser}>
+                        <SystemHealth />
+                    </ProtectedRoute}
                 } />
 
                 {/* Space detail route - opens in new tab, no layout wrapper needed */}
