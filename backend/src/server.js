@@ -41,18 +41,6 @@ await fastify.register(cors, {
 // Register database as a decorator
 fastify.decorate('db', db);
 
-// Health check endpoint
-fastify.get('/health', async (request, reply) => {
-  const dbHealth = await db.healthCheck();
-
-  return {
-    status: dbHealth.status === 'healthy' ? 'ok' : 'degraded',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    database: dbHealth,
-  };
-});
-
 // Root endpoint
 fastify.get('/', async (request, reply) => {
   return {
