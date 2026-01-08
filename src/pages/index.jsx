@@ -124,6 +124,7 @@ function PagesContent() {
                 setCheckingOrgs(true);
                 try {
                     const token = await window.Clerk.session.getToken();
+                    console.log('Fetching user organizations...');
                     const response = await fetch(`${API_BASE_URL}/api/users/orgs`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -131,6 +132,7 @@ function PagesContent() {
                     if (response.ok) {
                         const data = await response.json();
                         const orgs = data.data || [];
+                        console.log('User organizations:', orgs);
                         setUserOrgs(orgs);
 
                         // If user has orgs, set the first one as current (or keep existing if valid)
@@ -174,6 +176,7 @@ function PagesContent() {
                             setCurrentOrgId(null);
                         }
                     } else {
+                        console.log('Failed to fetch organizations:', response.status);
                         setUserOrgs([]);
                     }
                 } catch (err) {
@@ -187,6 +190,7 @@ function PagesContent() {
 
         // Only run once when currentUser is available
         if (currentUser && !usingMock && userOrgs === null) {
+            console.log('Running organization check...');
             checkOrganizations();
         }
     }, [currentUser, usingMock]);
@@ -197,8 +201,10 @@ function PagesContent() {
     };
 
     const handleOrganizationCreated = (org) => {
-        // Reload to refresh with new organization
-        window.location.reload();
+        // Update state directly instead of reloading
+        setUserOrgs([org]);
+        setCurrentOrgId(org.id);
+        // localStorage already set by CreateOrganization component
     };
 
     // Show loading state
