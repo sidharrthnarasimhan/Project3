@@ -48,7 +48,6 @@ const navItems = [
   { name: "Tasks", path: "Tasks", icon: CheckSquare },
   { name: "Announcements", path: "Announcements", icon: Megaphone },
   { name: "People", path: "People", icon: Users },
-  { name: "Health", path: "Health", icon: Activity },
   { name: "System Health", path: "SystemHealth", icon: Shield },
   { name: "Billing", path: "Billing", icon: DollarSign },
   { name: "Settings", path: "Settings", icon: Settings },
