@@ -137,18 +137,39 @@ function PagesContent() {
                             const storedOrgId = localStorage.getItem('current_org_id');
                             const currentOrgStillValid = orgs.find(o => o.id === storedOrgId);
 
+                            let selectedOrgId;
                             if (currentOrgStillValid) {
                                 // Keep existing valid org
+                                selectedOrgId = storedOrgId;
                                 setCurrentOrgId(storedOrgId);
                             } else {
                                 // Set to first org if current is invalid
-                                const newOrgId = orgs[0].id;
-                                localStorage.setItem('current_org_id', newOrgId);
-                                setCurrentOrgId(newOrgId);
+                                selectedOrgId = orgs[0].id;
+                                localStorage.setItem('current_org_id', selectedOrgId);
+                                setCurrentOrgId(selectedOrgId);
+                            }
+
+                            // Fetch user's role in the organization
+                            try {
+                                const membersResponse = await fetch(`http://localhost:3001/api/orgs/${selectedOrgId}/members`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                if (membersResponse.ok) {
+                                    const membersData = await membersResponse.json();
+                                    const members = membersData.data || [];
+                                    const currentMember = members.find(m => m.email === currentUser.email);
+                                    if (currentMember && currentMember.role) {
+                                        localStorage.setItem('current_user_role', currentMember.role);
+                                        console.log('User role set to:', currentMember.role);
+                                    }
+                                }
+                            } catch (err) {
+                                console.error('Failed to fetch user role:', err);
                             }
                         } else {
                             // No orgs - clear localStorage
                             localStorage.removeItem('current_org_id');
+                            localStorage.removeItem('current_user_role');
                             setCurrentOrgId(null);
                         }
                     } else {
